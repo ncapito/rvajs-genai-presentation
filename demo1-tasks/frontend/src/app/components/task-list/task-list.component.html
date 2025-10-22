@@ -1,0 +1,48 @@
+<div class="task-list-container">
+  @if (loading) {
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Loading tasks...</p>
+    </div>
+  } @else if (tasks.length === 0) {
+    <div class="empty-state">
+      <p>No tasks found matching your criteria.</p>
+    </div>
+  } @else {
+    <div class="task-count">
+      Found <strong>{{ tasks.length }}</strong> task{{ tasks.length === 1 ? '' : 's' }}
+    </div>
+    <div class="task-list">
+      @for (task of tasks; track task.id) {
+        <div class="task-card" [class.overdue]="isOverdue(task.dueDate) && task.status !== 'done'">
+          <div class="task-header">
+            <h3 class="task-title">{{ task.title }}</h3>
+            <div class="task-badges">
+              <span class="badge" [ngClass]="getStatusBadgeClass(task.status)">
+                {{ task.status }}
+              </span>
+              <span class="badge" [ngClass]="getPriorityBadgeClass(task.priority)">
+                {{ task.priority }}
+              </span>
+            </div>
+          </div>
+          <div class="task-details">
+            <div class="task-detail">
+              <span class="label">Assignee:</span>
+              <span class="value">{{ task.assignee || 'Unassigned' }}</span>
+            </div>
+            <div class="task-detail">
+              <span class="label">Due Date:</span>
+              <span class="value" [class.overdue-text]="isOverdue(task.dueDate) && task.status !== 'done'">
+                {{ task.dueDate }}
+                @if (isOverdue(task.dueDate) && task.status !== 'done') {
+                  <span class="overdue-badge">OVERDUE</span>
+                }
+              </span>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

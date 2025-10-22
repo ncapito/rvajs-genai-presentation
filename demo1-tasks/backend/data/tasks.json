@@ -1,0 +1,110 @@
+[
+  {
+    "id": "task-1",
+    "title": "Fix authentication bug",
+    "assignee": "Sarah Chen",
+    "status": "in-progress",
+    "priority": "high",
+    "dueDate": "2025-10-25",
+    "createdAt": "2025-10-15"
+  },
+  {
+    "id": "task-2",
+    "title": "Update API documentation",
+    "assignee": "John",
+    "status": "done",
+    "priority": "medium",
+    "dueDate": "2025-10-20",
+    "createdAt": "2025-10-10"
+  },
+  {
+    "id": "task-3",
+    "title": "Database migration",
+    "assignee": "Alex",
+    "status": "todo",
+    "priority": "high",
+    "dueDate": "2025-10-19",
+    "createdAt": "2025-10-12"
+  },
+  {
+    "id": "task-4",
+    "title": "Refactor user service",
+    "assignee": "Sarah Williams",
+    "status": "in-progress",
+    "priority": "medium",
+    "dueDate": "2025-10-28",
+    "createdAt": "2025-10-14"
+  },
+  {
+    "id": "task-5",
+    "title": "Security audit review",
+    "assignee": "Mike",
+    "status": "todo",
+    "priority": "high",
+    "dueDate": "2025-10-21",
+    "createdAt": "2025-10-13"
+  },
+  {
+    "id": "task-6",
+    "title": "Update dashboard UI",
+    "assignee": "Sarah Chen",
+    "status": "in-progress",
+    "priority": "low",
+    "dueDate": "2025-10-30",
+    "createdAt": "2025-10-16"
+  },
+  {
+    "id": "task-7",
+    "title": "Setup CI/CD pipeline",
+    "assignee": "John",
+    "status": "done",
+    "priority": "high",
+    "dueDate": "2025-10-18",
+    "createdAt": "2025-10-08"
+  },
+  {
+    "id": "task-8",
+    "title": "Write unit tests",
+    "assignee": "Sarah Williams",
+    "status": "todo",
+    "priority": "medium",
+    "dueDate": "2025-10-27",
+    "createdAt": "2025-10-17"
+  },
+  {
+    "id": "task-9",
+    "title": "Performance optimization",
+    "assignee": "Mike",
+    "status": "in-progress",
+    "priority": "medium",
+    "dueDate": "2025-10-26",
+    "createdAt": "2025-10-15"
+  },
+  {
+    "id": "task-10",
+    "title": "Code review for PR #234",
+    "assignee": "John",
+    "status": "todo",
+    "priority": "high",
+    "dueDate": "2025-10-23",
+    "createdAt": "2025-10-18"
+  },
+  {
+    "id": "task-11",
+    "title": "Update dependencies",
+    "assignee": null,
+    "status": "todo",
+    "priority": "low",
+    "dueDate": "2025-11-05",
+    "createdAt": "2025-10-19"
+  },
+  {
+    "id": "task-12",
+    "title": "Fix mobile responsiveness",
+    "assignee": "Alex",
+    "status": "todo",
+    "priority": "medium",
+    "dueDate": "2025-10-24",
+    "createdAt": "2025-10-16"
+  }
+]

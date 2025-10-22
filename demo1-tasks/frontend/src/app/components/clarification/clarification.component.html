@@ -1,0 +1,20 @@
+<div class="clarification-container">
+  <div class="clarification-icon">❓</div>
+  <h3>Need Clarification</h3>
+  <p class="clarification-message">{{ message }}</p>
+  @if (suggestions.length > 0) {
+    <div class="suggestions">
+      <p class="suggestions-label">Did you mean:</p>
+      <div class="suggestion-buttons">
+        @for (suggestion of suggestions; track suggestion) {
+          <button
+            class="suggestion-button"
+            (click)="selectSuggestion(suggestion)"
+          >
+            {{ suggestion }}
+          </button>
+        }
+      </div>
+    </div>
+  }
+</div>

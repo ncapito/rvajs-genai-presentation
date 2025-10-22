@@ -1,0 +1,36 @@
+<div class="app-container">
+  <header class="app-header">
+    <div class="header-content">
+      <h1>{{ title }}</h1>
+      <p class="tagline">See how GenAI transforms complex UIs into simple, natural interactions</p>
+    </div>
+  </header>
+
+  <nav class="app-nav">
+    <a
+      routerLink="/before"
+      routerLinkActive="active"
+      class="nav-link before-link"
+    >
+      🗂️ BEFORE: Traditional Filter Builder
+    </a>
+    <a
+      routerLink="/after"
+      routerLinkActive="active"
+      class="nav-link after-link"
+    >
+      ✨ AFTER: Natural Language Query
+    </a>
+  </nav>
+
+  <main class="app-main">
+    <router-outlet></router-outlet>
+  </main>
+
+  <footer class="app-footer">
+    <p>
+      Demo 1 of 3 - GenAI Presentation
+      | Backend: <code>http://localhost:3000</code>
+    </p>
+  </footer>
+</div>

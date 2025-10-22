@@ -1,0 +1,65 @@
+.clarification-container {
+  background: #fff3cd;
+  border: 2px solid #ffc107;
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  margin: 2rem 0;
+}
+
+.clarification-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.clarification-container h3 {
+  color: #856404;
+  margin: 0 0 1rem 0;
+  font-size: 1.5rem;
+}
+
+.clarification-message {
+  color: #856404;
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+}
+
+.suggestions {
+  margin-top: 1.5rem;
+}
+
+.suggestions-label {
+  color: #856404;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.suggestion-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.suggestion-button {
+  background: white;
+  border: 2px solid #ffc107;
+  color: #856404;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.suggestion-button:hover {
+  background: #ffc107;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.suggestion-button:active {
+  transform: translateY(0);
+}

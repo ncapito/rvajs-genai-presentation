@@ -1,0 +1,132 @@
+<div class="before-container">
+  <div class="header">
+    <h1>🗂️ Traditional Filter Builder (BEFORE)</h1>
+    <p class="subtitle">
+      Complex UI with dropdowns, date pickers, and multiple form fields
+    </p>
+  </div>
+
+  <div class="filter-section">
+    <h2>Filter Tasks</h2>
+
+    <div class="filter-grid">
+      <!-- Assignee Filter -->
+      <div class="filter-field">
+        <label for="assignee">Assignee</label>
+        <select
+          id="assignee"
+          [(ngModel)]="selectedAssignee"
+          class="filter-input"
+          [disabled]="loading"
+        >
+          <option value="">-- All Assignees --</option>
+          @for (user of users; track user.id) {
+            <option [value]="user.name">{{ user.name }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Status Filter -->
+      <div class="filter-field">
+        <label for="status">Status</label>
+        <select
+          id="status"
+          [(ngModel)]="selectedStatus"
+          class="filter-input"
+          [disabled]="loading"
+        >
+          <option value="">-- All Statuses --</option>
+          @for (status of statusOptions; track status) {
+            <option [value]="status">{{ status }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Priority Filter -->
+      <div class="filter-field">
+        <label for="priority">Priority</label>
+        <select
+          id="priority"
+          [(ngModel)]="selectedPriority"
+          class="filter-input"
+          [disabled]="loading"
+        >
+          <option value="">-- All Priorities --</option>
+          @for (priority of priorityOptions; track priority) {
+            <option [value]="priority">{{ priority }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Due Date After -->
+      <div class="filter-field">
+        <label for="dueDateAfter">Due Date After</label>
+        <input
+          type="date"
+          id="dueDateAfter"
+          [(ngModel)]="dueDateAfter"
+          class="filter-input"
+          [disabled]="loading"
+        />
+      </div>
+
+      <!-- Due Date Before -->
+      <div class="filter-field">
+        <label for="dueDateBefore">Due Date Before</label>
+        <input
+          type="date"
+          id="dueDateBefore"
+          [(ngModel)]="dueDateBefore"
+          class="filter-input"
+          [disabled]="loading"
+        />
+      </div>
+    </div>
+
+    <div class="filter-actions">
+      <button
+        (click)="executeQuery()"
+        [disabled]="loading"
+        class="apply-button"
+      >
+        @if (loading) {
+          <span class="button-spinner"></span>
+        } @else {
+          Apply Filters
+        }
+      </button>
+      <button
+        (click)="resetFilters()"
+        [disabled]="loading || !hasActiveFilters()"
+        class="reset-button"
+      >
+        Reset
+      </button>
+    </div>
+
+    @if (error) {
+      <div class="error-message">
+        ❌ {{ error }}
+      </div>
+    }
+  </div>
+
+  <div class="results-section">
+    <app-task-list
+      [tasks]="tasks"
+      [loading]="loading"
+    ></app-task-list>
+  </div>
+
+  <div class="problems">
+    <h3>❌ Problems with Traditional Approach</h3>
+    <ul>
+      <li>😫 <strong>Tedious UX</strong> - click through multiple dropdowns and date pickers</li>
+      <li>📚 <strong>Need to learn UI</strong> - users must understand all filter options</li>
+      <li>🔧 <strong>100+ lines of code</strong> - complex UI and form state management</li>
+      <li>🐛 <strong>Maintenance burden</strong> - need to update UI for every new filter</li>
+      <li>🚫 <strong>Limited flexibility</strong> - can only filter by predefined fields</li>
+      <li>⏱️ <strong>Time-consuming</strong> - takes 5+ clicks to build a simple query</li>
+    </ul>
+  </div>
+</div>
