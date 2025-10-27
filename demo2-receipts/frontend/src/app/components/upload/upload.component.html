@@ -1,0 +1,217 @@
+<div class="upload-container">
+  <h1>📄 Receipt Parsing with Vision AI</h1>
+  <p class="subtitle">Upload a receipt image (printed or handwritten) to extract structured data</p>
+
+  <!-- Approach Selector -->
+  <div class="approach-selector">
+    <button
+      [class.active]="approach === 'simple'"
+      (click)="switchApproach('simple')"
+      class="approach-btn simple-btn"
+    >
+      ⚡ Simple (Single Call)
+    </button>
+    <button
+      [class.active]="approach === 'chain'"
+      (click)="switchApproach('chain')"
+      class="approach-btn chain-btn"
+    >
+      🔗 Chain (Orchestrated)
+    </button>
+  </div>
+
+  <!-- Upload Area -->
+  @if (!imagePreview) {
+    <div
+      class="upload-area"
+      (drop)="onFileDrop($event)"
+      (dragover)="onDragOver($event)"
+    >
+      <div class="upload-icon">📤</div>
+      <p class="upload-text">Drag & drop receipt image here</p>
+      <p class="upload-subtext">or</p>
+      <label for="file-input" class="file-select-btn">
+        Choose File
+      </label>
+      <input
+        id="file-input"
+        type="file"
+        accept="image/*,application/pdf"
+        (change)="onFileSelected($event)"
+        style="display: none"
+      />
+      <p class="upload-hint">Supports: JPG, PNG, GIF, WebP, PDF</p>
+    </div>
+  }
+
+  <!-- Image/PDF Preview & Parse -->
+  @if (imagePreview && !result) {
+    <div class="preview-section">
+      <div class="preview-header">
+        <h3>{{ isPdf ? 'Receipt PDF' : 'Receipt Image' }}</h3>
+        <button (click)="reset()" class="reset-btn">✕ Remove</button>
+      </div>
+      @if (isPdf) {
+        <div class="pdf-preview">
+          <div class="pdf-icon">📄</div>
+          <p class="pdf-name">{{ selectedFile?.name }}</p>
+          <iframe [src]="safePdfUrl" class="pdf-embed" title="PDF preview"></iframe>
+        </div>
+      } @else {
+        <img [src]="imagePreview" alt="Receipt preview" class="receipt-preview" />
+      }
+      <button
+        (click)="parseReceipt()"
+        [disabled]="loading"
+        class="parse-btn"
+      >
+        @if (loading) {
+          <span class="spinner"></span> Parsing...
+        } @else {
+          🔍 Parse Receipt
+        }
+      </button>
+    </div>
+  }
+
+  <!-- Results -->
+  @if (result) {
+    <div class="results-section">
+      <div class="results-header">
+        <h3>Parsing Results</h3>
+        <button (click)="reset()" class="reset-btn">🔄 Parse Another</button>
+      </div>
+
+      <!-- Status Badge -->
+      <div class="status-badge" [ngClass]="getStatusClass(result.status)">
+        @if (result.status === 'success') {
+          ✅ Successfully Parsed
+        } @else if (result.status === 'partial') {
+          ⚠️ Partially Parsed
+        } @else if (result.status === 'not_a_receipt') {
+          ❌ Not a Receipt
+        } @else {
+          ❌ Unreadable
+        }
+      </div>
+
+      <!-- Success/Partial Results -->
+      @if (result.status === 'success' || result.status === 'partial') {
+        <div class="receipt-card">
+          <div class="receipt-header">
+            <h2>{{ result.receipt?.merchant }}</h2>
+            @if (result.receipt?.confidence) {
+              <span class="confidence-badge" [ngClass]="getConfidenceClass(result.receipt!.confidence)">
+                {{ result.receipt!.confidence }} confidence
+              </span>
+            }
+          </div>
+
+          <div class="receipt-details">
+            <div class="detail-row">
+              <span class="label">Date:</span>
+              <span class="value">{{ result.receipt?.date }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Category:</span>
+              <span class="value category-badge">{{ result.receipt?.category }}</span>
+            </div>
+            @if (result.receipt?.subtotal) {
+              <div class="detail-row">
+                <span class="label">Subtotal:</span>
+                <span class="value">${{ result.receipt!.subtotal!.toFixed(2) }}</span>
+              </div>
+            }
+            <div class="detail-row">
+              <span class="label">Tax:</span>
+              <span class="value">${{ result.receipt!.tax.toFixed(2) }}</span>
+            </div>
+            @if (result.receipt?.taxPercentage) {
+              <div class="detail-row highlight">
+                <span class="label">Tax %:</span>
+                <span class="value">{{ result.receipt!.taxPercentage!.toFixed(2) }}%</span>
+              </div>
+            }
+            <div class="detail-row total">
+              <span class="label">Total:</span>
+              <span class="value">${{ result.receipt!.total.toFixed(2) }}</span>
+            </div>
+          </div>
+
+          @if (result.receipt?.items && result.receipt!.items!.length > 0) {
+            <div class="items-section">
+              <h4>Items:</h4>
+              <div class="items-list">
+                @for (item of result.receipt!.items!; track item.description) {
+                  <div class="item-row">
+                    <span class="item-desc">{{ item.description }}</span>
+                    @if (item.quantity) {
+                      <span class="item-qty">×{{ item.quantity }}</span>
+                    }
+                    <span class="item-price">${{ item.price.toFixed(2) }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          @if (result.notes) {
+            <div class="notes">
+              <strong>Note:</strong> {{ result.notes }}
+            </div>
+          }
+        </div>
+
+        <!-- Partial Warning -->
+        @if (result.status === 'partial') {
+          <div class="warning-box">
+            <h4>⚠️ Partial Parse</h4>
+            <p>{{ result.message }}</p>
+            @if (result.missingFields && result.missingFields.length > 0) {
+              <p><strong>Missing fields:</strong> {{ result.missingFields.join(', ') }}</p>
+            }
+            @if (result.suggestions && result.suggestions.length > 0) {
+              <div class="suggestions">
+                <strong>Suggestions:</strong>
+                <ul>
+                  @for (suggestion of result.suggestions; track suggestion) {
+                    <li>{{ suggestion }}</li>
+                  }
+                </ul>
+              </div>
+            }
+          </div>
+        }
+      }
+
+      <!-- Error Results -->
+      @if (result.status === 'not_a_receipt' || result.status === 'unreadable') {
+        <div class="error-box">
+          <h4>
+            @if (result.status === 'not_a_receipt') {
+              Not a Receipt
+            } @else {
+              Image Unreadable
+            }
+          </h4>
+          <p>{{ result.reason }}</p>
+          @if (result.suggestions && result.suggestions.length > 0) {
+            <div class="suggestions">
+              <strong>Try this:</strong>
+              <ul>
+                @for (suggestion of result.suggestions; track suggestion) {
+                  <li>{{ suggestion }}</li>
+                }
+              </ul>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Approach Info -->
+      <div class="approach-info">
+        <strong>Parsed using:</strong> {{ result.approach === 'simple' ? 'Simple (Single Vision Call)' : 'Chain (LangChain Orchestration)' }}
+      </div>
+    </div>
+  }
+</div>
