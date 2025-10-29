@@ -1,0 +1,166 @@
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <h1>📧 Demo 3: Email Personalization with RAG</h1>
+    <p class="subtitle">Same data, wildly different emails - powered by LangChain & Azure OpenAI</p>
+  </div>
+
+  <!-- View Mode Selector -->
+  <div class="card view-mode-selector">
+    <button
+      [class.active]="viewMode === 'single'"
+      (click)="switchViewMode('single')"
+      class="mode-btn">
+      Single Email
+    </button>
+    <button
+      [class.active]="viewMode === 'comparison'"
+      (click)="switchViewMode('comparison')"
+      class="mode-btn">
+      Side-by-Side Comparison
+    </button>
+    <button
+      *ngIf="viewMode === 'comparison'"
+      (click)="generateAllEmails()"
+      [disabled]="loading"
+      class="generate-all-btn">
+      {{ loading ? 'Generating...' : 'Generate All Emails' }}
+    </button>
+  </div>
+
+  <!-- Single Email Mode -->
+  <div *ngIf="viewMode === 'single'">
+    <!-- User Selector -->
+    <div class="card">
+      <h2>Select User Persona</h2>
+      <div class="user-grid">
+        <div
+          *ngFor="let user of users"
+          class="user-card"
+          [class.selected]="selectedUser?.id === user.id"
+          [style.border-color]="getUserTypeColor(user.userType)"
+          (click)="selectUser(user)">
+          <div class="user-icon">{{ getUserTypeIcon(user.userType) }}</div>
+          <div class="user-info">
+            <h3>{{ user.name }}</h3>
+            <p class="user-type" [style.color]="getUserTypeColor(user.userType)">
+              {{ user.userType }}
+            </p>
+            <p class="user-description">{{ user.description }}</p>
+            <div class="user-preferences">
+              <span class="preference-tag">{{ user.preferences.preferredTone }}</span>
+              <span class="preference-tag">{{ user.preferences.detailLevel }} detail</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Generate Button -->
+    <div *ngIf="selectedUser" class="card">
+      <button (click)="generateEmail()" [disabled]="loading" class="generate-btn">
+        {{ loading ? 'Generating Email...' : 'Generate Email for ' + selectedUser.name }}
+      </button>
+    </div>
+  <!-- Task Data (for reference) -->
+  <div *ngIf="taskData" class="card task-data-card">
+    <h2>Task Activity Data (Same for All Users)</h2>
+    <p class="info-text">This is the SAME data used to generate all emails - personalization happens in the prompt!</p>
+    <div class="task-stats">
+      <div class="stat-item">
+        <div class="stat-value">{{ taskData.taskActivity.completed }}</div>
+        <div class="stat-label">Completed</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">{{ taskData.taskActivity.inProgress }}</div>
+        <div class="stat-label">In Progress</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">{{ taskData.taskActivity.overdue }}</div>
+        <div class="stat-label">Overdue</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">{{ taskData.taskActivity.commented }}</div>
+        <div class="stat-label">Commented</div>
+      </div>
+    </div>
+    <details class="task-details">
+      <summary>View Full Task Data (Click to Expand)</summary>
+      <pre>{{ taskData | json }}</pre>
+    </details>
+  </div>
+    <!-- Generated Email -->
+    <div *ngIf="generatedEmail" class="card email-result">
+      <div class="email-header">
+        <h2>Generated Email</h2>
+        <div class="email-meta">
+          <span class="meta-item">
+            <strong>User:</strong> {{ generatedEmail.user.name }} ({{ generatedEmail.user.userType }})
+          </span>
+          <span class="meta-item">
+            <strong>Generation Time:</strong> {{ generatedEmail.metadata.generationTime }}ms
+          </span>
+          <span class="meta-item">
+            <strong>Tone:</strong> {{ generatedEmail.email.tone }}
+          </span>
+        </div>
+      </div>
+
+      <div class="email-content">
+        <div class="email-subject">
+          <strong>Subject:</strong> {{ generatedEmail.email.subject }}
+        </div>
+        <div class="email-format-badge" [class.html]="generatedEmail.email.format === 'html'">
+          {{ generatedEmail.email.format === 'html' ? '📧 HTML Email' : '📝 Text Email' }}
+        </div>
+        <div class="email-body" [class.html-email]="generatedEmail.email.format === 'html'">
+          <pre *ngIf="generatedEmail.email.format === 'text'">{{ generatedEmail.email.body }}</pre>
+          <div *ngIf="generatedEmail.email.format === 'html'"
+               class="html-email-content"
+               [innerHTML]="getSafeHtml(generatedEmail.email.body)"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Side-by-Side Comparison Mode -->
+  <div *ngIf="viewMode === 'comparison' && allEmails.length > 0" class="comparison-grid">
+    <div *ngFor="let emailResult of allEmails" class="card email-comparison-card">
+      <div class="comparison-header" [style.background]="getUserTypeColor(emailResult.user.userType)">
+        <span class="comparison-icon">{{ getUserTypeIcon(emailResult.user.userType) }}</span>
+        <div>
+          <h3>{{ emailResult.user.name }}</h3>
+          <p>{{ emailResult.user.userType }}</p>
+        </div>
+      </div>
+
+      <div class="comparison-content">
+        <div class="email-subject">
+          <strong>Subject:</strong> {{ emailResult.email.subject }}
+        </div>
+        <div class="email-format-badge" [class.html]="emailResult.email.format === 'html'">
+          {{ emailResult.email.format === 'html' ? 'HTML' : 'Text' }}
+        </div>
+        <div class="email-body" [class.html-email]="emailResult.email.format === 'html'">
+          <pre *ngIf="emailResult.email.format === 'text'">{{ emailResult.email.body }}</pre>
+          <div *ngIf="emailResult.email.format === 'html'"
+               class="html-email-content"
+               [innerHTML]="getSafeHtml(emailResult.email.body)"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- Loading Indicator -->
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    <p>Generating personalized emails with LangChain + RAG...</p>
+  </div>
+
+  <!-- Error Display -->
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+</div>

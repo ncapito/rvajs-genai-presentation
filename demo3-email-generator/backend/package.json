@@ -1,0 +1,30 @@
+{
+  "name": "demo3-email-generator-backend",
+  "version": "1.0.0",
+  "description": "Backend for Demo 3: Email Personalization with RAG",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "@azure/openai": "^2.0.0",
+    "@langchain/core": "^0.3.27",
+    "@langchain/openai": "^0.3.16",
+    "ai": "^4.1.9",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "langchain": "^0.3.9",
+    "langsmith": "^0.2.14",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.10.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}

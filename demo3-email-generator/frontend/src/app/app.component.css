@@ -1,0 +1,409 @@
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.header {
+  text-align: center;
+  color: white;
+  margin-bottom: 30px;
+}
+
+.header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  opacity: 0.9;
+}
+
+/* View Mode Selector */
+.view-mode-selector {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+}
+
+.mode-btn {
+  background: #f3f4f6;
+  color: #374151;
+  padding: 10px 24px;
+}
+
+.mode-btn.active {
+  background: #667eea;
+  color: white;
+}
+
+.generate-all-btn {
+  background: #10b981;
+  color: white;
+  margin-left: auto;
+}
+
+.generate-all-btn:hover {
+  background: #059669;
+}
+
+/* User Grid */
+.user-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.user-card {
+  border: 3px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.user-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.user-card.selected {
+  border-width: 3px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.user-icon {
+  font-size: 3rem;
+  line-height: 1;
+}
+
+.user-info {
+  flex: 1;
+}
+
+.user-info h3 {
+  margin: 0 0 4px 0;
+  font-size: 1.25rem;
+}
+
+.user-type {
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  margin: 0 0 8px 0;
+}
+
+.user-description {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin: 0 0 12px 0;
+}
+
+.user-preferences {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.preference-tag {
+  background: #f3f4f6;
+  color: #374151;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* Generate Button */
+.generate-btn {
+  width: 100%;
+  background: #667eea;
+  color: white;
+  padding: 16px;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.generate-btn:hover {
+  background: #5568d3;
+}
+
+.generate-btn:disabled {
+  background: #9ca3af;
+}
+
+/* Email Result */
+.email-result {
+  background: #f9fafb;
+}
+
+.email-header {
+  margin-bottom: 20px;
+}
+
+.email-meta {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.meta-item {
+  display: flex;
+  gap: 6px;
+}
+
+.email-content {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.email-subject {
+  font-size: 1.1rem;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.email-body pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0;
+  background: transparent;
+  padding: 0;
+}
+
+/* HTML Email Format Badge */
+.email-format-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.email-format-badge.html {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+/* HTML Email Content */
+.email-body.html-email {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.html-email-content {
+  background: white;
+  overflow-x: auto;
+  /* Let inline styles from the email take precedence */
+  /* Don't add padding here - email has its own */
+}
+
+/* Reset any inherited styles that might interfere */
+.html-email-content * {
+  /* Allow inline styles to take full precedence */
+  box-sizing: border-box;
+}
+
+/* Comparison Grid */
+.comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.email-comparison-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.comparison-header {
+  color: white;
+  padding: 16px;
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: -24px -24px 16px -24px;
+}
+
+.comparison-icon {
+  font-size: 2rem;
+}
+
+.comparison-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.comparison-header p {
+  margin: 4px 0 0 0;
+  opacity: 0.9;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+}
+
+.comparison-content {
+  flex: 1;
+}
+
+.comparison-content .email-body {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.comparison-content .email-body pre {
+  font-size: 0.875rem;
+}
+
+/* Task Data Card */
+.task-data-card {
+  margin-top:25px;
+  background: #fffbeb;
+  border-left: 4px solid #f59e0b;
+}
+
+.info-text {
+  color: #92400e;
+  font-weight: 500;
+  margin-bottom: 20px;
+  padding: 12px;
+  background: white;
+  border-radius: 6px;
+}
+
+.task-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 16px;
+  background: white;
+  border-radius: 8px;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #667eea;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.task-details {
+  background: white;
+  padding: 16px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.task-details summary {
+  font-weight: 600;
+  color: #667eea;
+  user-select: none;
+}
+
+.task-details pre {
+  margin-top: 12px;
+  font-size: 0.875rem;
+}
+
+/* Loading Spinner */
+.loading {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  margin: 0 auto 20px;
+  border: 5px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading p {
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+/* Error */
+.error {
+  background: #fee;
+  border: 2px solid #fcc;
+  color: #c33;
+  padding: 16px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .comparison-grid {
+    /* Keep 2 columns on tablets */
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .header h1 {
+    font-size: 1.75rem;
+  }
+
+  .user-grid,
+  .comparison-grid {
+    /* Single column on mobile */
+    grid-template-columns: 1fr;
+  }
+
+  .email-meta {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .view-mode-selector {
+    flex-direction: column;
+  }
+
+  .generate-all-btn {
+    margin-left: 0;
+    width: 100%;
+  }
+}

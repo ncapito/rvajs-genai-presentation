@@ -1,0 +1,67 @@
+{
+  "taskActivity": {
+    "assigned": 12,
+    "inProgress": 3,
+    "completed": 5,
+    "overdue": 2,
+    "commented": 7,
+    "created": 4,
+    "lastActive": "2024-10-10",
+    "dateRange": "Oct 7-14"
+  },
+  "recentActivity": [
+    {
+      "taskId": "task-123",
+      "title": "Fix authentication bug",
+      "action": "commented",
+      "timestamp": "2024-10-12",
+      "collaborator": "Sarah",
+      "comment": "Nick, need your input on the session handling approach"
+    },
+    {
+      "taskId": "task-456",
+      "title": "API rate limiting strategy",
+      "action": "mentioned",
+      "timestamp": "2024-10-11",
+      "collaborator": "John",
+      "comment": "@nick thoughts on the Redis approach?"
+    },
+    {
+      "taskId": "task-789",
+      "title": "Update API documentation",
+      "action": "completed",
+      "timestamp": "2024-10-11"
+    }
+  ],
+  "overdueTasks": [
+    {
+      "title": "Database migration",
+      "dueDate": "2024-10-11",
+      "priority": "high",
+      "daysPastDue": 3
+    },
+    {
+      "title": "Security audit review",
+      "dueDate": "2024-10-13",
+      "priority": "medium",
+      "daysPastDue": 1
+    }
+  ],
+  "inProgressTasks": [
+    {
+      "title": "Fix authentication bug",
+      "assignee": "nick",
+      "commentCount": 3
+    },
+    {
+      "title": "Refactor user service",
+      "assignee": "nick",
+      "commentCount": 0
+    },
+    {
+      "title": "Update dashboard UI",
+      "assignee": "nick",
+      "commentCount": 1
+    }
+  ]
+}

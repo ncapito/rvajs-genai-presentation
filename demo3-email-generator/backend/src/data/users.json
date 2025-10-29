@@ -1,0 +1,52 @@
+[
+  {
+    "id": "user-001",
+    "name": "Sarah Chen",
+    "email": "sarah.chen@example.com",
+    "userType": "detail-oriented",
+    "preferences": {
+      "detailLevel": "high",
+      "preferredTone": "professional",
+      "emailFrequency": "daily"
+    },
+    "description": "Wants comprehensive breakdowns, stats, full visibility"
+  },
+  {
+    "id": "user-002",
+    "name": "Mike Rodriguez",
+    "email": "mike.rodriguez@example.com",
+    "userType": "action-focused",
+    "preferences": {
+      "detailLevel": "low",
+      "preferredTone": "direct",
+      "emailFrequency": "only-when-needed"
+    },
+    "description": "Just tell me what to do, skip the fluff"
+  },
+  {
+    "id": "user-003",
+    "name": "Alex Kumar",
+    "email": "alex.kumar@example.com",
+    "userType": "inactive",
+    "preferences": {
+      "detailLevel": "medium",
+      "preferredTone": "encouraging",
+      "emailFrequency": "weekly"
+    },
+    "description": "Hasn't logged in recently, needs motivation",
+    "lastActive": "2024-10-10"
+  },
+  {
+    "id": "user-004",
+    "name": "Jamie Taylor",
+    "email": "jamie.taylor@example.com",
+    "userType": "meme-loving",
+    "preferences": {
+      "detailLevel": "medium",
+      "preferredTone": "humorous",
+      "emailFrequency": "weekly",
+      "includeMemes": true
+    },
+    "description": "Chronically online developer, appreciates humor"
+  }
+]

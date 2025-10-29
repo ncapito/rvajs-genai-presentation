@@ -1,0 +1,74 @@
+[
+  {
+    "id": "comment-001",
+    "taskId": "task-123",
+    "taskTitle": "Fix authentication bug",
+    "author": "Sarah",
+    "text": "Nick, need your input on the session handling approach. Should we use JWT or session cookies?",
+    "timestamp": "2024-10-12T10:30:00Z",
+    "mentions": ["nick"]
+  },
+  {
+    "id": "comment-002",
+    "taskId": "task-123",
+    "taskTitle": "Fix authentication bug",
+    "author": "Mike",
+    "text": "I agree with Sarah's concern. We also need to consider the security implications of each approach.",
+    "timestamp": "2024-10-12T11:15:00Z",
+    "mentions": []
+  },
+  {
+    "id": "comment-003",
+    "taskId": "task-123",
+    "taskTitle": "Fix authentication bug",
+    "author": "Sarah",
+    "text": "Nick, any update on this? The security team is waiting for your decision.",
+    "timestamp": "2024-10-12T15:45:00Z",
+    "mentions": ["nick"]
+  },
+  {
+    "id": "comment-004",
+    "taskId": "task-456",
+    "taskTitle": "API rate limiting strategy",
+    "author": "John",
+    "text": "@nick thoughts on the Redis approach? I think it would work well for our distributed system.",
+    "timestamp": "2024-10-11T09:20:00Z",
+    "mentions": ["nick"]
+  },
+  {
+    "id": "comment-005",
+    "taskId": "task-456",
+    "taskTitle": "API rate limiting strategy",
+    "author": "Emily",
+    "text": "We should also consider using a token bucket algorithm for smoother rate limiting.",
+    "timestamp": "2024-10-11T10:00:00Z",
+    "mentions": []
+  },
+  {
+    "id": "comment-006",
+    "taskId": "task-456",
+    "taskTitle": "API rate limiting strategy",
+    "author": "John",
+    "text": "Good point Emily. Nick, what do you think about combining Redis with token bucket?",
+    "timestamp": "2024-10-11T14:30:00Z",
+    "mentions": ["nick"]
+  },
+  {
+    "id": "comment-007",
+    "taskId": "task-202",
+    "taskTitle": "Mobile app architecture",
+    "author": "Alex",
+    "text": "We need to decide between React Native and Flutter. Nick, you have experience with both - which would you recommend?",
+    "timestamp": "2024-10-10T13:00:00Z",
+    "mentions": ["nick"]
+  },
+  {
+    "id": "comment-008",
+    "taskId": "task-789",
+    "taskTitle": "Update dashboard UI",
+    "author": "Designer",
+    "text": "Nick, I've updated the mockups based on your feedback. Let me know if this works better.",
+    "timestamp": "2024-10-11T16:00:00Z",
+    "mentions": ["nick"]
+  }
+]
