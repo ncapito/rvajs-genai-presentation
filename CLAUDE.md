@@ -248,3 +248,4 @@ By the end of the presentation, audience should understand:
 - RAG patterns for dynamic context
 - Graceful degradation strategies
 - End-to-end AI application architecture
+- 1.  I also was hoping we could find a way to show on the front end nprogress.  Is there a way we could use sse to stream "logs" to the front end so they can see what is going on ?

@@ -1,10 +1,10 @@
 # Demo 1 Quick Start Guide
 
-**Get running in 5 minutes**
+Get running in 5 minutes.
 
 ## Prerequisites
 - Node.js 18+
-- Azure OpenAI API key
+- Azure OpenAI API key and endpoint
 
 ## Setup
 
@@ -26,7 +26,13 @@ npm start
 ```
 ✅ Browser opens to `http://localhost:4200`
 
-## Test It Works
+## Verify Setup
+
+Test backend health:
+```bash
+curl http://localhost:3000/health
+# Should return: {"status":"ok","timestamp":"..."}
+```
 
 Navigate to the **AFTER** tab and type:
 ```
@@ -47,25 +53,21 @@ Show me high priority tasks
 ## Troubleshooting
 
 **Backend won't start**: Check `.env` file has all 4 Azure OpenAI variables
+```bash
+cd backend && cat .env
+```
 
-**Frontend errors**: Run `rm -rf node_modules && npm install`
+**Frontend errors**: Clear and reinstall dependencies
+```bash
+cd frontend && rm -rf node_modules && npm install
+```
 
 **Queries failing**: Check backend terminal for error messages
 
-## Demo Flow (20 min)
+## Next Steps
 
-1. **BEFORE tab** (5 min) - Show complex filter UI
-2. **AFTER tab** (5 min) - Show natural language queries
-3. **Live code** (10 min) - Open `backend/src/services/llm.service.ts` lines 88-123
+**For Presenters**: See [docs/demo/PRESENTER_CHEAT_SHEET.md](./docs/demo/PRESENTER_CHEAT_SHEET.md)
 
-## Files to Review
+**For Technical Walkthrough**: See [docs/demo/DEMO_WALKTHROUGH.md](./docs/demo/DEMO_WALKTHROUGH.md)
 
-**Backend**:
-- `backend/src/services/llm.service.ts` (AI logic)
-- `backend/src/schemas/query.schema.ts` (Zod schemas)
-
-**Frontend**:
-- `frontend/src/app/components/after/` (Natural language UI)
-- `frontend/src/app/components/before/` (Traditional UI)
-
-See [README.md](./README.md) for complete documentation.
+**For Complete Documentation**: See [README.md](./README.md)

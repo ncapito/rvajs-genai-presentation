@@ -1,44 +1,43 @@
 <div class="container">
-  <!-- Header -->
-  <div class="header">
-    <h1>📧 Demo 3: Email Personalization with RAG</h1>
-    <p class="subtitle">Same data, wildly different emails - powered by LangChain & Azure OpenAI</p>
-  </div>
-
-  <!-- View Mode Selector -->
-  <div class="card view-mode-selector">
-    <button
-      [class.active]="viewMode === 'single'"
-      (click)="switchViewMode('single')"
-      class="mode-btn">
-      Single Email
-    </button>
-    <button
-      [class.active]="viewMode === 'comparison'"
-      (click)="switchViewMode('comparison')"
-      class="mode-btn">
-      Side-by-Side Comparison
-    </button>
-    <button
-      *ngIf="viewMode === 'comparison'"
-      (click)="generateAllEmails()"
-      [disabled]="loading"
-      class="generate-all-btn">
-      {{ loading ? 'Generating...' : 'Generate All Emails' }}
-    </button>
+  <!-- Header with View Mode Toggle -->
+  <div class="header-with-toggle">
+    <h2>Select User Persona</h2>
+    <div class="view-mode-toggle">
+      <button
+        [class.active]="viewMode === 'single'"
+        (click)="switchViewMode('single')"
+        class="toggle-btn"
+        [style.background]="viewMode === 'single' && selectedUser ? getUserTypeColor(selectedUser.userType) : null"
+        [style.border-color]="viewMode === 'single' && selectedUser ? getUserTypeColor(selectedUser.userType) : null">
+        Single Email
+      </button>
+      <button
+        [class.active]="viewMode === 'comparison'"
+        (click)="switchViewMode('comparison')"
+        class="toggle-btn">
+        Comparison
+      </button>
+      <button
+        *ngIf="viewMode === 'comparison'"
+        (click)="generateAllEmails()"
+        [disabled]="loading"
+        class="generate-all-btn-compact">
+        {{ loading ? '⏳' : '🔄 Generate All' }}
+      </button>
+    </div>
   </div>
 
   <!-- Single Email Mode -->
   <div *ngIf="viewMode === 'single'">
     <!-- User Selector -->
     <div class="card">
-      <h2>Select User Persona</h2>
       <div class="user-grid">
         <div
           *ngFor="let user of users"
           class="user-card"
           [class.selected]="selectedUser?.id === user.id"
           [style.border-color]="getUserTypeColor(user.userType)"
+          [style.--user-color]="getUserTypeColor(user.userType)"
           (click)="selectUser(user)">
           <div class="user-icon">{{ getUserTypeIcon(user.userType) }}</div>
           <div class="user-info">
@@ -56,43 +55,36 @@
       </div>
     </div>
 
-    <!-- Generate Button -->
+    <!-- Generate and Sample Buttons -->
     <div *ngIf="selectedUser" class="card">
-      <button (click)="generateEmail()" [disabled]="loading" class="generate-btn">
-        {{ loading ? 'Generating Email...' : 'Generate Email for ' + selectedUser.name }}
-      </button>
-    </div>
-  <!-- Task Data (for reference) -->
-  <div *ngIf="taskData" class="card task-data-card">
-    <h2>Task Activity Data (Same for All Users)</h2>
-    <p class="info-text">This is the SAME data used to generate all emails - personalization happens in the prompt!</p>
-    <div class="task-stats">
-      <div class="stat-item">
-        <div class="stat-value">{{ taskData.taskActivity.completed }}</div>
-        <div class="stat-label">Completed</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-value">{{ taskData.taskActivity.inProgress }}</div>
-        <div class="stat-label">In Progress</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-value">{{ taskData.taskActivity.overdue }}</div>
-        <div class="stat-label">Overdue</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-value">{{ taskData.taskActivity.commented }}</div>
-        <div class="stat-label">Commented</div>
+      <div class="button-group">
+        <button
+          (click)="generateEmail()"
+          [disabled]="loading"
+          class="generate-btn"
+          [style.background]="loading ? '#9ca3af' : getUserTypeColor(selectedUser.userType)"
+          [style.border-color]="getUserTypeColor(selectedUser.userType)">
+          {{ loading ? 'Generating Email...' : 'Generate Email' }}
+        </button>
+
+        <div class="sample-buttons">
+          <span class="sample-label">Or view sample:</span>
+          <button (click)="viewSampleEmail('text')" [disabled]="loading" class="sample-btn">
+            📝 Text Version
+          </button>
+          <button (click)="viewSampleEmail('html')" [disabled]="loading" class="sample-btn">
+            📧 HTML Version
+          </button>
+        </div>
       </div>
     </div>
-    <details class="task-details">
-      <summary>View Full Task Data (Click to Expand)</summary>
-      <pre>{{ taskData | json }}</pre>
-    </details>
-  </div>
+
     <!-- Generated Email -->
-    <div *ngIf="generatedEmail" class="card email-result">
+    <div *ngIf="generatedEmail" class="card email-result" #emailResult>
       <div class="email-header">
-        <h2>Generated Email</h2>
+        <h2>
+          {{ isSampleEmail ? '📋 Sample Email (Static)' : '🤖 Generated Email (Live)' }}
+        </h2>
         <div class="email-meta">
           <span class="meta-item">
             <strong>User:</strong> {{ generatedEmail.user.name }} ({{ generatedEmail.user.userType }})
@@ -121,10 +113,46 @@
         </div>
       </div>
     </div>
+      <!-- Task Data (for reference) -->
+  <div *ngIf="taskData" class="card task-data-card">
+    <h2>Task Activity Data (Same for All Users)</h2>
+    <p class="info-text">This is the SAME data used to generate all emails - personalization happens in the prompt!</p>
+    <div class="task-stats">
+      <div class="stat-item">
+        <div class="stat-value">{{ taskData.taskActivity.completed }}</div>
+        <div class="stat-label">Completed</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">{{ taskData.taskActivity.inProgress }}</div>
+        <div class="stat-label">In Progress</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">{{ taskData.taskActivity.overdue }}</div>
+        <div class="stat-label">Overdue</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">{{ taskData.taskActivity.commented }}</div>
+        <div class="stat-label">Commented</div>
+      </div>
+    </div>
+    <details class="task-details">
+      <summary>View Full Task Data (Click to Expand)</summary>
+      <pre>{{ taskData | json }}</pre>
+    </details>
+  </div>
   </div>
 
   <!-- Side-by-Side Comparison Mode -->
-  <div *ngIf="viewMode === 'comparison' && allEmails.length > 0" class="comparison-grid">
+  <div *ngIf="viewMode === 'comparison'">
+    <!-- Instruction message when no emails generated yet -->
+    <div *ngIf="allEmails.length === 0 && !loading" class="card comparison-instructions">
+      <h3>📊 Side-by-Side Email Comparison</h3>
+      <p>Click the "🔄 Generate All" button above to generate personalized emails for all 4 user personas.</p>
+      <p>You'll see how the same task data produces completely different emails based on user preferences!</p>
+    </div>
+
+    <!-- Comparison Grid -->
+    <div *ngIf="allEmails.length > 0" class="comparison-grid">
     <div *ngFor="let emailResult of allEmails" class="card email-comparison-card">
       <div class="comparison-header" [style.background]="getUserTypeColor(emailResult.user.userType)">
         <span class="comparison-icon">{{ getUserTypeIcon(emailResult.user.userType) }}</span>
@@ -149,9 +177,8 @@
         </div>
       </div>
     </div>
+    </div>
   </div>
-
-
 
   <!-- Loading Indicator -->
   <div *ngIf="loading" class="loading">

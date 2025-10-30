@@ -21,12 +21,38 @@ export type ParseStatus = 'success' | 'partial' | 'not_a_receipt' | 'unreadable'
 
 export interface ParseResponse {
   success: boolean;
-  approach: 'simple' | 'chain';
-  status: ParseStatus;
+  approach: 'simple' | 'chain' | 'tool-calling';
+  status?: ParseStatus;
   receipt?: ReceiptData;
   notes?: string;
   missingFields?: string[];
   message?: string;
   suggestions?: string[];
   reason?: string;
+  matching?: MatchResult;  // For tool-calling approach
+  error?: string;
+}
+
+export interface MatchResult {
+  reasoning: string;
+  toolCalls: ToolCall[];
+  match: TaskMatch | null;
+}
+
+export interface ToolCall {
+  toolName: string;
+  input: any;
+  result: any;
+}
+
+export interface TaskMatch {
+  taskId: string;
+  title: string;
+  description?: string;
+  assignee: string | null;
+  budget: number;
+  createdAt: string;
+  dueDate: string;
+  confidenceScore: number;
+  matchReasons: string[];
 }

@@ -1,0 +1,34 @@
+═══════════════════════════════════════
+        Amazon Web Services
+═══════════════════════════════════════
+
+Invoice #: INV-2025-10-AWS-1847
+Date: October 25, 2025
+
+AWS Account: 482-3847-2910
+Billing Period: Oct 1-31, 2025
+
+═══════════════════════════════════════
+SERVICES
+═══════════════════════════════════════
+
+EC2 Instances (t3.medium × 2)     $42.50
+RDS Database (db.t3.large)        $38.40
+S3 Storage (500 GB)               $11.50
+CloudFront CDN                    $18.75
+Elastic Load Balancer             $16.28
+
+                          ───────────────
+Subtotal:                        $127.43
+Tax:                               $0.00
+                          ───────────────
+TOTAL:                           $127.43
+                          ═══════════════
+
+Payment Method: **** **** **** 4829
+Status: PAID
+
+Thank you for using AWS!
+Support: aws.amazon.com/support
+
+═══════════════════════════════════════

@@ -1,0 +1,65 @@
+═══════════════════════════════════════
+           GitHub, Inc.
+    The world's leading software
+         development platform
+═══════════════════════════════════════
+
+Invoice #: GH-ENT-2025-487392
+Date: November 1, 2025
+
+Bill To:
+Acme Corporation
+Engineering Department
+123 Tech Drive
+San Francisco, CA 94102
+
+Account: acme-corp-engineering
+Billing Period: Nov 2025 - Oct 2026
+
+═══════════════════════════════════════
+SUBSCRIPTION DETAILS
+═══════════════════════════════════════
+
+GitHub Enterprise Cloud
+Annual Subscription
+
+User Licenses: 15 seats
+Price per seat/year: $231.00
+
+                          ───────────────
+Subtotal (15 × $231):             $3,465.00
+                          ───────────────
+
+Applied Credits:
+- Early Renewal Discount (25%)    -$866.25
+- Educational Credit              -$500.00
+                          ───────────────
+Adjusted Subtotal:                $2,098.75
+Sales Tax:                            $0.00
+                          ───────────────
+TOTAL DUE:                        $2,098.75
+                          ═══════════════
+
+Payment Method: Invoice (NET 30)
+Payment Terms: Due by December 1, 2025
+PO Number: PO-2025-ENG-0847
+
+═══════════════════════════════════════
+INCLUDED FEATURES:
+═══════════════════════════════════════
+✓ Unlimited private repositories
+✓ GitHub Advanced Security
+✓ 50,000 CI/CD minutes/month
+✓ 50 GB Packages storage
+✓ Premium Support (99.95% SLA)
+✓ SAML SSO
+✓ Audit logging
+✓ Required reviewers
+
+═══════════════════════════════════════
+
+Questions? Contact our sales team:
+enterprise@github.com
+1-888-GITHUB-1
+
+Thank you for choosing GitHub Enterprise!

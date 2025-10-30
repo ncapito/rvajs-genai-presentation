@@ -1,23 +1,60 @@
 <div class="upload-container">
-  <h1>📄 Receipt Parsing with Vision AI</h1>
-  <p class="subtitle">Upload a receipt image (printed or handwritten) to extract structured data</p>
-
   <!-- Approach Selector -->
   <div class="approach-selector">
     <button
       [class.active]="approach === 'simple'"
+      [class.has-results]="results.simple !== null"
       (click)="switchApproach('simple')"
       class="approach-btn simple-btn"
     >
-      ⚡ Simple (Single Call)
+      <span class="btn-title">⚡ Simple (Single Call)</span>
+      <span class="btn-description">Multimodal Claude using prompt + image with Zod schema validation</span>
+      @if (results.simple) {
+        <span class="cached-indicator">✓</span>
+      }
     </button>
     <button
       [class.active]="approach === 'chain'"
+      [class.has-results]="results.chain !== null"
       (click)="switchApproach('chain')"
       class="approach-btn chain-btn"
     >
-      🔗 Chain (Orchestrated)
+      <span class="btn-title">🔗 Chain (Orchestrated)</span>
+      <span class="btn-description">LangChain multi-step workflow with vision and structured output</span>
+      @if (results.chain) {
+        <span class="cached-indicator">✓</span>
+      }
     </button>
+    <button
+      [class.active]="approach === 'tool-calling'"
+      [class.has-results]="results['tool-calling'] !== null"
+      (click)="switchApproach('tool-calling')"
+      class="approach-btn tool-btn"
+    >
+      <span class="btn-title">🛠️ Tool Calling (AI Reasoning)</span>
+      <span class="btn-description">Claude using tools for semantic search, date filtering, and budget matching with SSE streaming</span>
+      @if (results['tool-calling']) {
+        <span class="cached-indicator">✓</span>
+      }
+    </button>
+  </div>
+
+  <!-- Approach Info Section (shows under selected button) -->
+  <div class="approach-info-section">
+    <div class="info-card">
+      <div class="info-problem">
+        <h4>💡 Problem We're Solving</h4>
+        <p>{{ getApproachInfo(approach).problem }}</p>
+      </div>
+      <div class="info-tech">
+        <h4>🛠️ Tech Stack</h4>
+        <ul>
+          @for (tech of getApproachInfo(approach).tech; track tech) {
+            <li>{{ tech }}</li>
+          }
+        </ul>
+      </div>
+    </div>
   </div>
 
   <!-- Upload Area -->
@@ -49,7 +86,24 @@
     <div class="preview-section">
       <div class="preview-header">
         <h3>{{ isPdf ? 'Receipt PDF' : 'Receipt Image' }}</h3>
-        <button (click)="reset()" class="reset-btn">✕ Remove</button>
+        <div class="header-actions">
+          <button
+            (click)="parseReceipt()"
+            [disabled]="loading || streaming || results[approach] !== null"
+            class="parse-btn"
+          >
+            @if (loading) {
+              <span class="spinner"></span> Parsing...
+            } @else if (streaming) {
+              <span class="spinner"></span> Analyzing...
+            } @else if (results[approach]) {
+              ✓ Results Ready
+            } @else {
+              🔍 Parse Receipt
+            }
+          </button>
+          <button (click)="reset()" class="reset-btn">✕ Remove</button>
+        </div>
       </div>
       @if (isPdf) {
         <div class="pdf-preview">
@@ -58,19 +112,17 @@
           <iframe [src]="safePdfUrl" class="pdf-embed" title="PDF preview"></iframe>
         </div>
       } @else {
-        <img [src]="imagePreview" alt="Receipt preview" class="receipt-preview" />
+        <div class="image-preview-container">
+          <img
+            [src]="imagePreview"
+            alt="Receipt preview"
+            class="receipt-preview"
+            (click)="toggleImageEnlarged()"
+            title="Click to enlarge"
+          />
+          <div class="enlarge-hint">🔍 Click to enlarge</div>
+        </div>
       }
-      <button
-        (click)="parseReceipt()"
-        [disabled]="loading"
-        class="parse-btn"
-      >
-        @if (loading) {
-          <span class="spinner"></span> Parsing...
-        } @else {
-          🔍 Parse Receipt
-        }
-      </button>
     </div>
   }
 
@@ -83,17 +135,19 @@
       </div>
 
       <!-- Status Badge -->
-      <div class="status-badge" [ngClass]="getStatusClass(result.status)">
-        @if (result.status === 'success') {
-          ✅ Successfully Parsed
-        } @else if (result.status === 'partial') {
-          ⚠️ Partially Parsed
-        } @else if (result.status === 'not_a_receipt') {
-          ❌ Not a Receipt
-        } @else {
-          ❌ Unreadable
-        }
-      </div>
+      @if (result.status) {
+        <div class="status-badge" [ngClass]="getStatusClass(result.status)">
+          @if (result.status === 'success') {
+            ✅ Successfully Parsed
+          } @else if (result.status === 'partial') {
+            ⚠️ Partially Parsed
+          } @else if (result.status === 'not_a_receipt') {
+            ❌ Not a Receipt
+          } @else {
+            ❌ Unreadable
+          }
+        </div>
+      }
 
       <!-- Success/Partial Results -->
       @if (result.status === 'success' || result.status === 'partial') {
@@ -208,10 +262,165 @@
         </div>
       }
 
+      <!-- Matched Task (Tool Calling Only) -->
+      @if (result.matching) {
+        <div class="matched-task-section">
+          <h3>🎯 Matched Task</h3>
+
+          @if (result.matching.match) {
+            <div class="match-card">
+              <div class="match-header">
+                <h4>{{ result.matching.match.title }}</h4>
+                <div class="confidence-badge" [class.high]="result.matching.match.confidenceScore >= 80"
+                     [class.medium]="result.matching.match.confidenceScore >= 60 && result.matching.match.confidenceScore < 80"
+                     [class.low]="result.matching.match.confidenceScore < 60">
+                  {{ result.matching.match.confidenceScore }}% Confidence
+                </div>
+              </div>
+
+              @if (result.matching.match.description) {
+                <p class="match-description">{{ result.matching.match.description }}</p>
+              }
+
+              <div class="match-details">
+                <div class="detail-row">
+                  <span class="label">Task ID:</span>
+                  <span class="value">{{ result.matching.match.taskId }}</span>
+                </div>
+                @if (result.matching.match.assignee) {
+                  <div class="detail-row">
+                    <span class="label">Assigned to:</span>
+                    <span class="value">{{ result.matching.match.assignee }}</span>
+                  </div>
+                }
+                <div class="detail-row">
+                  <span class="label">Budget:</span>
+                  <span class="value">${{ result.matching.match.budget.toFixed(2) }}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label">Receipt Amount:</span>
+                  <span class="value">${{ result.receipt!.total.toFixed(2) }}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label">Task Period:</span>
+                  <span class="value">{{ result.matching.match.createdAt | date:'mediumDate' }} - {{ result.matching.match.dueDate | date:'mediumDate' }}</span>
+                </div>
+              </div>
+
+              <div class="match-reasons">
+                <h5>Match Reasons:</h5>
+                <ul>
+                  @for (reason of result.matching.match.matchReasons; track reason) {
+                    <li>{{ reason }}</li>
+                  }
+                </ul>
+              </div>
+            </div>
+          } @else {
+            <div class="no-match-card">
+              <p>❌ No matching task found for this receipt.</p>
+              <p class="hint">The receipt may not match any task budgets, dates, or categories.</p>
+            </div>
+          }
+        </div>
+      }
+
       <!-- Approach Info -->
       <div class="approach-info">
-        <strong>Parsed using:</strong> {{ result.approach === 'simple' ? 'Simple (Single Vision Call)' : 'Chain (LangChain Orchestration)' }}
+        <strong>Parsed using:</strong>
+        @if (result.approach === 'simple') {
+          Simple (Single Vision Call)
+        } @else if (result.approach === 'chain') {
+          Chain (LangChain Orchestration)
+        } @else if (result.approach === 'tool-calling') {
+          Tool Calling (AI Reasoning with Tools)
+        }
       </div>
     </div>
   }
+
+
+  <!-- SSE Streaming Progress (Tool Calling) -->
+  @if (streaming || (progressMessages.length > 0 && approach === 'tool-calling')) {
+    <div class="streaming-section">
+      <div class="streaming-header">
+        <h3>🤖 AI Reasoning Process</h3>
+        @if (streaming) {
+          <span class="live-badge">● LIVE</span>
+        }
+      </div>
+
+      <!-- Progress Messages -->
+      @if (progressMessages.length > 0) {
+        <div class="progress-log">
+          <h4>Progress Log</h4>
+          <div class="log-messages">
+            @for (msg of progressMessages; track $index) {
+              <div class="log-message">
+                <span class="log-time">{{ msg.timestamp | date:'HH:mm:ss.SSS' }}</span>
+                <span class="log-text">{{ msg.message }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Tool Calls -->
+      @if (toolCalls.length > 0) {
+        <div class="tool-calls-section">
+          <h4>🔧 Tools Called</h4>
+          @for (call of toolCalls; track $index) {
+            <div class="tool-call-card">
+              <div class="tool-call-header">
+                <strong>{{ call.name }}</strong>
+                @if (call.result) {
+                  <span class="tool-status complete">✓ Complete</span>
+                } @else {
+                  <span class="tool-status running">⏳ Running...</span>
+                }
+              </div>
+              <div class="tool-call-input">
+                <strong>Input:</strong>
+                <pre>{{ call.input | json }}</pre>
+              </div>
+              @if (call.result) {
+                <div class="tool-call-result">
+                  <strong>Result:</strong>
+                  <pre>{{ call.result | json }}</pre>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Claude's Reasoning -->
+      @if (reasoning) {
+        <div class="reasoning-section">
+          <h4>🧠 Claude's Reasoning</h4>
+          <div class="reasoning-text">{{ reasoning }}</div>
+        </div>
+      }
+
+      <!-- Error -->
+      @if (streamingError) {
+        <div class="streaming-error">
+          ❌ {{ streamingError }}
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Image Enlarged Modal -->
+  @if (isImageEnlarged && imagePreview && !isPdf) {
+    <div class="image-modal" (click)="toggleImageEnlarged()">
+      <div class="modal-backdrop"></div>
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <button class="modal-close" (click)="toggleImageEnlarged(); $event.stopPropagation()">✕</button>
+        <img [src]="imagePreview" alt="Receipt enlarged" class="enlarged-image" />
+        <div class="modal-hint">Click anywhere to close</div>
+      </div>
+    </div>
+  }
+
 </div>

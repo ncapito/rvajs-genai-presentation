@@ -3,9 +3,9 @@ import { readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { getVectorStore } from '../config/vectorstore.config.js';
-import { generateEmailWithTracing, createFullEmailChain } from '../chains/email.chains.js';
-import { getEmailGenerationTracingConfig } from '../config/langsmith.config.js';
+import { createFullEmailChain } from '../chains/index.js';
 import type { UserProfile, TaskActivity } from '../schemas/email.schema.js';
+import { getSampleEmailsForUser, getSampleEmail, getAllSampleEmails } from '../data/sample-emails.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -45,14 +45,10 @@ router.get('/users/:userId', (req: Request, res: Response) => {
 /**
  * POST /api/generate-email
  * Generate a personalized email for a specific user
- *
- * Query params:
- * - trace=true: Enable LangSmith tracing for this request (if LANGCHAIN_TRACING_V2=true)
  */
 router.post('/generate-email', async (req: Request, res: Response) => {
   try {
     const { userId } = req.body;
-    const enableTracing = req.query.trace == 'true';
 
     if (!userId) {
       return res.status(400).json({ error: 'userId is required' });
@@ -64,23 +60,13 @@ router.post('/generate-email', async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    console.log(`\nGenerating email for ${user.name} (${user.userType})...`);
-    if (enableTracing) {
-      console.log('🔍 LangSmith tracing enabled for this request');
-    }
+    console.log(`Generating email for ${user.name} (${user.userType})...`);
 
     // Get vector store
     const vectorStore = getVectorStore();
 
-    // Get tracing config
-    const tracingConfig = getEmailGenerationTracingConfig(
-      userId,
-      user.userType,
-      {
-        enabled: enableTracing,
-        includeMemes: user.preferences.includeMemes,
-      }
-    );
+    // Create the full email chain with RAG
+    const emailChain = createFullEmailChain(vectorStore);
 
     // Prepare input data
     const input = {
@@ -89,15 +75,14 @@ router.post('/generate-email', async (req: Request, res: Response) => {
       recentActivity: taskData.recentActivity,
       overdueTasks: taskData.overdueTasks,
       inProgressTasks: taskData.inProgressTasks,
-      tracingConfig, // Pass tracing config to chains
     };
 
-    // Invoke the chain with tracing
+    // Invoke the chain
     const startTime = Date.now();
-    const result = await generateEmailWithTracing(input, vectorStore);
+    const result = await emailChain.invoke(input);
     const duration = Date.now() - startTime;
 
-    console.log(`\n✅ Email generated in ${duration}ms for ${user.name}`);
+    console.log(`Email generated in ${duration}ms for ${user.name}`);
 
     res.json({
       success: true,
@@ -110,7 +95,6 @@ router.post('/generate-email', async (req: Request, res: Response) => {
       metadata: {
         generationTime: duration,
         style: result.emailStyle,
-        traced: enableTracing,
       },
     });
   } catch (error: any) {
@@ -203,6 +187,72 @@ router.post('/generate-email-batch', async (req: Request, res: Response) => {
  */
 router.get('/task-data', (req: Request, res: Response) => {
   res.json(taskData);
+});
+
+/**
+ * GET /api/sample-emails
+ * Get all sample/static emails for demo purposes
+ */
+router.get('/sample-emails', (req: Request, res: Response) => {
+  const samples = getAllSampleEmails();
+  res.json({ samples });
+});
+
+/**
+ * GET /api/sample-emails/:userId
+ * Get sample emails for a specific user (both text and html versions)
+ */
+router.get('/sample-emails/:userId', (req: Request, res: Response) => {
+  const { userId } = req.params;
+  const samples = getSampleEmailsForUser(userId);
+
+  if (samples.length === 0) {
+    return res.status(404).json({ error: 'No sample emails found for this user' });
+  }
+
+  res.json({
+    userId,
+    samples,
+    text: samples.find(s => s.format === 'text'),
+    html: samples.find(s => s.format === 'html')
+  });
+});
+
+/**
+ * GET /api/sample-emails/:userId/:format
+ * Get a specific sample email by user and format (text or html)
+ */
+router.get('/sample-emails/:userId/:format', (req: Request, res: Response) => {
+  const { userId, format } = req.params;
+
+  if (format !== 'text' && format !== 'html') {
+    return res.status(400).json({ error: 'Format must be either "text" or "html"' });
+  }
+
+  const sample = getSampleEmail(userId, format as 'text' | 'html');
+
+  if (!sample) {
+    return res.status(404).json({ error: `No ${format} sample email found for user ${userId}` });
+  }
+
+  res.json({
+    success: true,
+    user: {
+      id: sample.userId,
+      name: sample.userName,
+      userType: sample.userType
+    },
+    email: {
+      subject: sample.subject,
+      body: sample.body,
+      format: sample.format,
+      tone: sample.tone
+    },
+    metadata: {
+      generationTime: 0, // Static content, instant
+      isSample: true
+    }
+  });
 });
 
 export default router;

@@ -24,7 +24,7 @@ export class DalleProvider implements ImageGenerationProvider {
   async generateImage(prompt: string, timeout: number): Promise<string | null> {
     try {
       console.log(`  🖼️  DALL-E Request:`);
-      console.log(`     Model: ${memeConfig.dalleDeployment}`);
+      console.log(`     Model: ${memeConfig.imageDeployment}`);
       console.log(`     Endpoint: ${process.env.IMAGE_ENDPOINT_URL || process.env.AZURE_OPENAI_ENDPOINT}`);
       console.log(`     Timeout: ${timeout}ms`);
 
@@ -33,7 +33,7 @@ export class DalleProvider implements ImageGenerationProvider {
       });
 
       const generatePromise = azureImageClient.images.generate({
-        model: memeConfig.dalleDeployment,
+        model: memeConfig.imageDeployment,
         prompt,
         n: 1,
         size: '1024x1024',

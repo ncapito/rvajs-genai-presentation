@@ -6,6 +6,9 @@ dotenv.config();
 import { initializeOpik } from './config/opik.config';
 initializeOpik();
 
+// Initialize vector store for task matching (optional - only if Azure OpenAI configured)
+import { initializeVectorStore } from './config/vectorstore.config';
+
 import express, { Express, Request, Response } from 'express';
 import cors from 'cors';
 import receiptRouter from './routes/receipt.routes';
@@ -43,7 +46,7 @@ app.use((err: Error, req: Request, res: Response, next: any) => {
 });
 
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`
 ╔═══════════════════════════════════════════════════════╗
 ║                                                       ║
@@ -53,9 +56,25 @@ app.listen(PORT, () => {
 ║                                                       ║
 ║   Endpoints:                                          ║
 ║   - GET  /health                                      ║
-║   - POST /api/parse/simple   (Single Vision call)    ║
-║   - POST /api/parse/chain    (LangChain orchestr.)   ║
+║   - POST /api/parse/simple     (Single Vision call)  ║
+║   - POST /api/parse/chain      (LangChain orchestr.) ║
+║   - POST /api/match            (Tool calling)        ║
+║   - POST /api/match/stream     (SSE streaming) 🌟    ║
 ║                                                       ║
 ╚═══════════════════════════════════════════════════════╝
   `);
+
+  // Initialize vector store for task matching (optional)
+  if (process.env.AZURE_OPENAI_API_KEY && process.env.AZURE_OPENAI_ENDPOINT) {
+    try {
+      await initializeVectorStore();
+      console.log('✓ Task matching feature enabled (Azure OpenAI configured)\n');
+    } catch (error) {
+      console.warn('⚠️  Task matching feature disabled - vector store initialization failed');
+      console.warn('   Check Azure OpenAI configuration if you want to use /api/match endpoint\n');
+    }
+  } else {
+    console.log('ℹ️  Task matching feature disabled (Azure OpenAI not configured)');
+    console.log('   Set AZURE_OPENAI_API_KEY and AZURE_OPENAI_ENDPOINT to enable /api/match endpoint\n');
+  }
 });

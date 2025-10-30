@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
@@ -20,6 +20,9 @@ export class AppComponent implements OnInit {
   loading = false;
   error: string | null = null;
   viewMode: 'single' | 'comparison' = 'single';
+  isSampleEmail = false; // Track if currently viewing a sample email
+
+  @ViewChild('emailResult') emailResult?: ElementRef;
 
   constructor(
     private emailService: EmailService,
@@ -65,11 +68,13 @@ export class AppComponent implements OnInit {
 
     this.loading = true;
     this.error = null;
+    this.isSampleEmail = false;
 
     this.emailService.generateEmail(this.selectedUser.id).subscribe({
       next: (response) => {
         this.generatedEmail = response;
         this.loading = false;
+        this.scrollToEmail();
       },
       error: (err) => {
         this.error = 'Failed to generate email';
@@ -77,6 +82,39 @@ export class AppComponent implements OnInit {
         console.error(err);
       },
     });
+  }
+
+  viewSampleEmail(format: 'text' | 'html') {
+    if (!this.selectedUser) return;
+
+    this.loading = true;
+    this.error = null;
+
+    this.emailService.getSampleEmail(this.selectedUser.id, format).subscribe({
+      next: (response) => {
+        this.generatedEmail = response;
+        this.isSampleEmail = true;
+        this.loading = false;
+        this.scrollToEmail();
+      },
+      error: (err) => {
+        this.error = 'Failed to load sample email';
+        this.loading = false;
+        console.error(err);
+      },
+    });
+  }
+
+  private scrollToEmail() {
+    // Wait a bit for Angular to render the email
+    setTimeout(() => {
+      if (this.emailResult) {
+        this.emailResult.nativeElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    }, 100);
   }
 
   generateAllEmails() {

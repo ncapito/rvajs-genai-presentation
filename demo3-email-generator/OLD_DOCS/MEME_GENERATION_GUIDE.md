@@ -75,7 +75,7 @@ export const memeConfig = {
   enabled: true,  // ← Change to true
   generationTimeout: 10000, // 10 seconds
   fallbackToText: true,
-  dalleDeployment: process.env.AZURE_OPENAI_DALLE_DEPLOYMENT || 'dall-e-3',
+  imageDeployment: process.env.AZURE_OPENAI_DALLE_DEPLOYMENT || 'dall-e-3',
 };
 ```
 
@@ -141,7 +141,7 @@ export const memeConfig = {
   enabled: false,           // Toggle meme generation on/off
   generationTimeout: 10000, // Timeout in milliseconds (10s)
   fallbackToText: true,     // Show text if image fails
-  dalleDeployment: 'dall-e-3', // DALL-E deployment name
+  imageDeployment: 'dall-e-3', // DALL-E deployment name
 };
 ```
 

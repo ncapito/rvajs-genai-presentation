@@ -32,9 +32,9 @@ export const TaskActivitySchema = z.object({
 });
 
 // Meme spot schema (for meme-loving persona)
+// Note: Position is determined by [MEME_X] markers in the body text, not by a position field
 export const MemeSpotSchema = z.object({
-  position: z.number().describe('Position in the email where meme should appear'),
-  generationPrompt: z.string().describe('Prompt to generate the meme image'),
+  generationPrompt: z.string().describe('Prompt to generate the meme image with DALL-E'),
   altText: z.string().describe('Alt text for accessibility'),
   textFallback: z.string().describe('Text to show if image generation fails'),
 });
@@ -44,7 +44,7 @@ export const EmailSchema = z.object({
   subject: z.string().describe('Email subject line'),
   body: z.string().describe('Full email body content'),
   format: z.enum(['text', 'html']).describe('Email format'),
-  tone: z.enum(['professional', 'casual', 'humorous', 'encouraging']).describe('Email tone used'),
+  tone: z.enum(['professional', 'direct', 'casual', 'humorous', 'encouraging']).describe('Email tone used'),
   priorityActions: z.array(z.string()).optional().describe('List of priority actions for the user'),
   memeSpots: z.array(MemeSpotSchema).optional().describe('Locations for meme images (meme-loving persona only)'),
 });

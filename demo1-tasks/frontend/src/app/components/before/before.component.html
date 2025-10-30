@@ -1,10 +1,5 @@
 <div class="before-container">
-  <div class="header">
-    <h1>🗂️ Traditional Filter Builder (BEFORE)</h1>
-    <p class="subtitle">
-      Complex UI with dropdowns, date pickers, and multiple form fields
-    </p>
-  </div>
+
 
   <div class="filter-section">
     <h2>Filter Tasks</h2>
@@ -118,15 +113,17 @@
     ></app-task-list>
   </div>
 
-  <div class="problems">
-    <h3>❌ Problems with Traditional Approach</h3>
-    <ul>
-      <li>😫 <strong>Tedious UX</strong> - click through multiple dropdowns and date pickers</li>
-      <li>📚 <strong>Need to learn UI</strong> - users must understand all filter options</li>
-      <li>🔧 <strong>100+ lines of code</strong> - complex UI and form state management</li>
-      <li>🐛 <strong>Maintenance burden</strong> - need to update UI for every new filter</li>
-      <li>🚫 <strong>Limited flexibility</strong> - can only filter by predefined fields</li>
-      <li>⏱️ <strong>Time-consuming</strong> - takes 5+ clicks to build a simple query</li>
-    </ul>
-  </div>
+  @if (hasSearched) {
+    <div class="problems">
+      <h3>❌ Problems with Traditional Approach</h3>
+      <ul>
+        <li>😫 <strong>Tedious UX</strong> - click through multiple dropdowns and date pickers</li>
+        <li>📚 <strong>Need to learn UI</strong> - users must understand all filter options</li>
+        <li>🔧 <strong>100+ lines of code</strong> - complex UI and form state management</li>
+        <li>🐛 <strong>Maintenance burden</strong> - need to update UI for every new filter</li>
+        <li>🚫 <strong>Limited flexibility</strong> - can only filter by predefined fields</li>
+        <li>⏱️ <strong>Time-consuming</strong> - takes 5+ clicks to build a simple query</li>
+      </ul>
+    </div>
+  }
 </div>

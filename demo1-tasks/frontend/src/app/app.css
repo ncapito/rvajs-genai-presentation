@@ -6,8 +6,9 @@
 }
 
 .app-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: white;
+  border-bottom: 3px solid #3498db;
+  color: #2c3e50;
   padding: 2rem 1rem;
   text-align: center;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -20,8 +21,9 @@
 
 .tagline {
   margin: 0;
-  opacity: 0.9;
+  color: #7f8c8d;
   font-size: 1.1rem;
+  font-weight: 600;
 }
 
 .app-nav {
@@ -84,7 +86,7 @@
 
 .app-main {
   flex: 1;
-  padding: 2rem 0;
+  /*padding: 2rem 0; */
 }
 
 .app-footer {

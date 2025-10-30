@@ -75,4 +75,8 @@ export class EmailService {
   getTaskData(): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/task-data`);
   }
+
+  getSampleEmail(userId: string, format: 'text' | 'html'): Observable<EmailGenerationResponse> {
+    return this.http.get<EmailGenerationResponse>(`${this.apiUrl}/sample-emails/${userId}/${format}`);
+  }
 }

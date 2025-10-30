@@ -53,6 +53,16 @@ export const generateMemesChain = RunnableLambda.from(async (input: {
   logChainStep(6, 'Generate Memes', undefined, `${email.memeSpots.length} images with ${imageProvider.name}`);
   const timer = new StepTimer('Meme Generation');
 
+  // Log current state
+  console.log(`  Email body contains ${email.body.length} characters`);
+  const existingMarkers = email.body.match(/\[MEME_\d+\]/g);
+  if (existingMarkers) {
+    console.log(`  Found existing markers in body: ${existingMarkers.join(', ')}`);
+  } else {
+    console.warn(`  ⚠️ No [MEME_X] markers found in email body!`);
+    console.log(`  Body preview (first 200 chars): ${email.body.substring(0, 200)}...`);
+  }
+
   try {
     // Generate images for each meme spot with timeout
     const memePromises = email.memeSpots.map(async (spot: MemeSpot, index: number) => {
@@ -80,7 +90,6 @@ export const generateMemesChain = RunnableLambda.from(async (input: {
         imageTimer.end();
 
         return {
-          position: spot.position,
           imageUrl,
           altText: spot.altText,
           textFallback: spot.textFallback,
@@ -89,7 +98,6 @@ export const generateMemesChain = RunnableLambda.from(async (input: {
         console.warn(`  ❌ Meme ${index + 1} failed:`, error.message);
         // Return fallback
         return {
-          position: spot.position,
           imageUrl: null,
           altText: spot.altText,
           textFallback: spot.textFallback,
@@ -100,32 +108,31 @@ export const generateMemesChain = RunnableLambda.from(async (input: {
     // Wait for all memes (or fallbacks)
     const generatedMemes = await Promise.all(memePromises);
 
-    // Inject memes into the HTML email body
+    // Inject memes into the HTML email body using simple marker replacement
     let updatedBody = email.body;
 
-    // Sort by position (highest first) so we don't mess up positions when inserting
-    const sortedMemes = [...generatedMemes].sort((a, b) => b.position - a.position);
+    // Simple approach: Replace markers like [MEME_1], [MEME_2], [MEME_3]
+    // These should have been inserted after HTML conversion based on memeSpots
+    for (let i = 0; i < generatedMemes.length; i++) {
+      const meme = generatedMemes[i];
+      const marker = `[MEME_${i + 1}]`;
 
-    for (const meme of sortedMemes) {
       const memeHtml = meme.imageUrl
         ? `<div style="text-align: center; margin: 24px 0;">
-             <img src="${meme.imageUrl}"
-                  alt="${meme.altText}"
-                  style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" />
-             <p style="font-size: 14px; color: #6b7280; margin-top: 8px; font-style: italic;">${meme.altText}</p>
-           </div>`
+           <img src="${meme.imageUrl}"
+                alt="${meme.altText}"
+                style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+           <p style="font-size: 14px; color: #6b7280; margin-top: 8px; font-style: italic;">${meme.altText}</p>
+         </div>`
         : `<div style="background: #f3f4f6; padding: 16px; border-radius: 8px; text-align: center; margin: 24px 0; font-style: italic; color: #6b7280;">
-             ${meme.textFallback}
-           </div>`;
+           ${meme.textFallback}
+         </div>`;
 
-      // Insert at the meme position (rough split by paragraphs)
-      const paragraphs = updatedBody.split('</p>');
-      if (meme.position > 0 && meme.position <= paragraphs.length) {
-        paragraphs.splice(meme.position, 0, memeHtml);
-        updatedBody = paragraphs.join('</p>');
+      if (updatedBody.includes(marker)) {
+        updatedBody = updatedBody.replace(marker, memeHtml);
+        console.log(`  ✓ Replaced marker ${marker} with ${meme.imageUrl ? 'generated image' : 'fallback'}`);
       } else {
-        // Append at the end if position is out of range
-        updatedBody += memeHtml;
+        console.warn(`  ⚠️ Marker ${marker} not found in HTML body`);
       }
     }
 
@@ -133,6 +140,16 @@ export const generateMemesChain = RunnableLambda.from(async (input: {
     const fallbackCount = generatedMemes.length - successCount;
 
     console.log(`  Results: ${successCount} generated, ${fallbackCount} fallback`);
+
+    // Verify all markers were replaced
+    const remainingMarkers = updatedBody.match(/\[MEME_\d+\]/g);
+    if (remainingMarkers) {
+      console.warn(`  ⚠️ WARNING: Unreplaced markers still in body: ${remainingMarkers.join(', ')}`);
+    } else {
+      console.log(`  ✓ All markers successfully replaced`);
+    }
+
+    console.log(`  Final body length: ${updatedBody.length} characters`);
     timer.end();
 
     return {

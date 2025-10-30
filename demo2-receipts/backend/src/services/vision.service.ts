@@ -1,10 +1,9 @@
 import  { Anthropic  } from '@anthropic-ai/sdk';
 import { ReceiptParseResult, ReceiptParseResultSchema } from '../schemas/receipt.schema';
 import { readFileSync } from 'fs';
-import { zodToJsonSchema } from 'zod-to-json-schema';
-import { withOpikTrace } from '../config/opik.config';
 import { buildReceiptPrompt } from '../shared/prompts/receipt.prompt';
 import { getMediaType } from '../shared/utils/media.util';
+import { getAnthropicClient } from '../shared/utils/anthropic.util';
 
 /**
  * SIMPLE APPROACH - Direct Anthropic SDK
@@ -31,17 +30,7 @@ class VisionService {
    */
   private getClient(): Anthropic {
     if (!this.client) {
-      const apiKey = process.env.ANTHROPIC_API_KEY;
-
-      if (!apiKey) {
-        throw new Error(
-          'Missing Anthropic API key. Please set ANTHROPIC_API_KEY environment variable.'
-        );
-      }
-
-      this.client = new Anthropic({
-        apiKey
-      });
+      this.client = getAnthropicClient();
     }
     return this.client;
   }
@@ -51,17 +40,6 @@ class VisionService {
    * This is the SIMPLE approach - single API call
    */
   async parseReceipt(imagePath: string): Promise<ReceiptParseResult> {
-    return withOpikTrace(
-      'simple-vision-parse',
-      async () => this._parseReceiptImpl(imagePath),
-      { approach: 'simple', service: 'vision' }
-    );
-  }
-
-  /**
-   * Internal implementation of parseReceipt (wrapped by Opik trace)
-   */
-  private async _parseReceiptImpl(imagePath: string): Promise<ReceiptParseResult> {
     try {
       const client = this.getClient();
 
@@ -75,36 +53,34 @@ class VisionService {
       const prompt = buildReceiptPrompt();
 
       // Prepare content block (document for PDF, image for images)
-      const messages:any [] = [];
+      const messages: any[] = [];
       const docType = isPdf ? 'document' : 'image';
       messages.push({
-          role: 'user',
-          content: [
-            { 
-              type: docType,
-              source: {
-                type: 'base64',
-                media_type: mediaType, //'application/pdf',
-                data: base64Data
-              }
+        role: 'user',
+        content: [
+          {
+            type: docType,
+            source: {
+              type: 'base64',
+              media_type: mediaType,
+              data: base64Data
             }
-          ]
+          }
+        ]
       });
-    
+
       messages.push({
         role: 'user',
         content: prompt
       });
 
       // Call Claude API (supports both images and PDFs)
-      const response = await client.messages.create(
-        {
-          model: "claude-sonnet-4-20250514", // Updated model with PDF support
-          max_tokens: 2000,
-          temperature: 0.0,
-          messages: messages
-        }
-      );
+      const response = await client.messages.create({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2000,
+        temperature: 0.0,
+        messages: messages
+      });
 
       // Extract and parse the response
       const content = response.content[0];
@@ -114,27 +90,23 @@ class VisionService {
 
       // Parse JSON from response
       let parsed: any;
-      
-      try{
+
+      try {
         parsed = JSON.parse(content.text);
       } catch (error) {
-        console.error('Error parsing response from Claude: ' + content.text);
-        throw new Error('Failed to parse response from Claude');;
+        console.error('[Vision Service] Failed to parse JSON from Claude:', content.text);
+        throw new Error('Claude returned invalid JSON');
       }
 
-      // Debug: Log the raw response from Claude
-      console.log('[Vision Service] Raw Claude response:', JSON.stringify(parsed, null, 2));
-
-      // Transform Claude's response to match our schema
-      const transformed = this.transformResponse(parsed);
+      console.log('[Vision Service] Parsed response:', JSON.stringify(parsed, null, 2));
 
       // Validate against our Zod schema
-      const validated = ReceiptParseResultSchema.parse(transformed);
+      const validated = ReceiptParseResultSchema.parse(parsed);
 
       return validated;
 
     } catch (error) {
-      console.error('Error parsing receipt with Claude Vision:', error);
+      console.error('[Vision Service] Error:', error);
 
       // Return a graceful error response
       return {
@@ -148,49 +120,6 @@ class VisionService {
         ]
       };
     }
-  }
-
-  /**
-   * Transform Claude's response format to match our schema
-   * Claude sometimes returns richer structures than we ask for!
-   */
-  private transformResponse(response: any): any {
-    // If it's an error response (not_a_receipt, unreadable), return as-is
-    if (response.status === 'not_a_receipt' || response.status === 'unreadable') {
-      return response;
-    }
-
-    // Transform the receipt data
-    if (response.receipt) {
-      const receipt = response.receipt;
-
-      // Extract category from merchant object if present
-      let category = receipt.category;
-      if (typeof receipt.merchant === 'object' && receipt.merchant.category) {
-        category = receipt.merchant.category;
-      }
-
-      // Handle merchant - could be string or object
-      if (typeof receipt.merchant === 'object' && receipt.merchant.name) {
-        receipt.merchant = receipt.merchant.name;
-      }
-
-      // Set category at receipt level
-      if (category) {
-        receipt.category = category;
-      }
-
-      // Handle items - map 'name' to 'description' and 'amount' to 'price' if needed
-      if (receipt.items && Array.isArray(receipt.items)) {
-        receipt.items = receipt.items.map((item: any) => ({
-          description: item.description || item.name,
-          price: item.price ?? item.amount, // Use ?? to handle 0 properly
-          quantity: item.quantity
-        }));
-      }
-    }
-
-    return response;
   }
 }
 

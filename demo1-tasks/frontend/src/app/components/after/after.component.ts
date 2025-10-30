@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TaskService } from '../../services/task.service';
@@ -12,18 +12,23 @@ import { ClarificationComponent } from '../clarification/clarification.component
   templateUrl: './after.component.html',
   styleUrls: ['./after.component.css']
 })
-export class AfterComponent {
+export class AfterComponent implements OnInit {
   query: string = '';
   tasks: Task[] = [];
   loading: boolean = false;
   error: string = '';
   explanation: string = '';
+  hasSearched: boolean = false;
 
   // Clarification state
   needsClarification: boolean = false;
   clarificationMessage: string = '';
   suggestions: string[] = [];
   originalQuery: string = '';
+
+  // JSON display state
+  showJson: boolean = false;
+  rawJsonResponse: any = null;
 
   // Example queries for the user
   exampleQueries: string[] = [
@@ -35,6 +40,33 @@ export class AfterComponent {
   ];
 
   constructor(private taskService: TaskService) {}
+
+  ngOnInit(): void {
+    // Load all tasks initially
+    this.loadAllTasks();
+  }
+
+  /**
+   * Load all tasks (no filters)
+   */
+  loadAllTasks(): void {
+    this.loading = true;
+    this.error = '';
+
+    this.taskService.getAllTasks().subscribe({
+      next: (response) => {
+        this.loading = false;
+        if (response.success) {
+          this.tasks = response.data;
+        }
+      },
+      error: (err) => {
+        this.loading = false;
+        this.error = 'Failed to load tasks';
+        console.error('Error loading tasks:', err);
+      }
+    });
+  }
 
   /**
    * Execute natural language query
@@ -49,10 +81,14 @@ export class AfterComponent {
     this.explanation = '';
     this.needsClarification = false;
     this.tasks = [];
+    this.hasSearched = true;
 
     this.taskService.queryNatural(this.query).subscribe({
       next: (response) => {
         this.loading = false;
+
+        // Store raw JSON response for debugging
+        this.rawJsonResponse = response;
 
         if (response.needsClarification) {
           // Handle clarification case
@@ -102,5 +138,22 @@ export class AfterComponent {
     if (event.key === 'Enter') {
       this.executeQuery();
     }
+  }
+
+  /**
+   * Toggle JSON display
+   */
+  toggleJsonDisplay(): void {
+    this.showJson = !this.showJson;
+  }
+
+  /**
+   * Get formatted JSON string
+   */
+  getFormattedJson(): string {
+    if (!this.rawJsonResponse) {
+      return '';
+    }
+    return JSON.stringify(this.rawJsonResponse, null, 2);
   }
 }

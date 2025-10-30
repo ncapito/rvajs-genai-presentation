@@ -182,3 +182,157 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* JSON Display Styles */
+.json-toggle-button {
+  padding: 1rem 1.2rem;
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.3rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 50px;
+}
+
+.json-toggle-button:hover {
+  background: #2980b9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+}
+
+.json-toggle-button:active {
+  transform: translateY(0);
+}
+
+.json-display {
+  margin-top: 1rem;
+  background: #2c3e50;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid #34495e;
+}
+
+.json-header {
+  background: #34495e;
+  color: #ecf0f1;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #4a5f7f;
+}
+
+.json-content {
+  margin: 0;
+  padding: 1rem;
+  background: #2c3e50;
+  color: #2ecc71;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  overflow-x: auto;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.json-content::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.json-content::-webkit-scrollbar-track {
+  background: #34495e;
+}
+
+.json-content::-webkit-scrollbar-thumb {
+  background: #4a5f7f;
+  border-radius: 4px;
+}
+
+.json-content::-webkit-scrollbar-thumb:hover {
+  background: #5d738f;
+}
+
+/* Data Model Section */
+.data-model-section {
+  background: #f8f9fa;
+  border: 2px solid #95a5a6;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-top: 2rem;
+}
+
+.data-model-section h3 {
+  color: #34495e;
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.data-model-description {
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+}
+
+.schema-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.schema-field {
+  background: white;
+  border: 2px solid #bdc3c7;
+  border-radius: 8px;
+  padding: 1rem;
+  transition: all 0.2s;
+}
+
+.schema-field:hover {
+  border-color: #3498db;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(52, 152, 219, 0.2);
+}
+
+.field-name {
+  font-family: 'Courier New', monospace;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+}
+
+.field-type {
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  color: #7f8c8d;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+.field-example {
+  font-size: 0.9rem;
+  color: #95a5a6;
+  font-style: italic;
+}
+
+.schema-note {
+  background: #fff3cd;
+  border-left: 4px solid #f39c12;
+  padding: 1rem;
+  border-radius: 4px;
+  color: #856404;
+  margin: 0;
+}
+
+.schema-note code {
+  background: #ffeeba;
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  color: #856404;
+  font-weight: 600;
+}

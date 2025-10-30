@@ -24,6 +24,9 @@ export function buildReceiptPrompt(): string {
 
   return `Analyze this receipt image and extract structured data.
 
+CRITICAL: Respond with ONLY raw JSON. Do NOT wrap in markdown code blocks or use \`\`\`json formatting.
+Return the JSON object directly without any additional text, explanations, or formatting.
+
 IMPORTANT RULES:
 - If this is clearly a receipt, parse it and return status: "success"
 - If image quality is poor but you can read some fields, return status: "partial" with what you found
@@ -33,37 +36,72 @@ IMPORTANT RULES:
 For successful/partial parsing:
 - Return all amounts as numbers (no currency symbols)
 - Date in ISO format (YYYY-MM-DD) - if year is missing, use ${currentYear}
-- Categorize based on merchant type:
+- merchant: string (just the name, e.g. "Starbucks")
+- category: one of: "food", "retail", "office", "travel", "entertainment", "other"
   * food: restaurants, cafes, grocery stores
   * retail: clothing, electronics, general stores
   * office: office supplies, business services
   * travel: gas stations, airlines, hotels
   * entertainment: movies, events, recreation
   * other: anything else
-- Set confidence level based on image quality:
-  * high: clear, easy to read
-  * medium: some uncertainty or unclear parts
-  * low: poor quality but readable
-- If handwritten, read carefully and note in the response
-- Extract items if clearly visible
+- confidence: "high", "medium", or "low" based on image quality
+- items (if visible): array of objects with "description" (string), "price" (number), "quantity" (number, optional)
 
 For partial success:
 - List which fields you couldn't read in missingFields array
 - Explain why in message (e.g., "bottom of receipt is faded")
 - Provide actionable suggestions in suggestions array
 
-For errors:
-- Be specific about what went wrong
-- Provide actionable suggestions for improvement
-
 Current date: ${today}
 
-CRITICAL: Respond with ONLY raw JSON. Do NOT wrap in markdown code blocks or use \`\`\`json formatting.
-Return the JSON object directly without any additional text, explanations, or formatting.
+EXACT JSON SCHEMA - Follow this structure precisely:
 
-JSON structure:
-- Success: {"status": "success", "receipt": {...}, "notes": "..."}
-- Partial: {"status": "partial", "receipt": {...}, "missingFields": [...], "message": "...", "suggestions": [...]}
-- Not a receipt: {"status": "not_a_receipt", "reason": "...", "suggestion": "..."}
-- Unreadable: {"status": "unreadable", "reason": "...", "suggestions": [...]}`;
+SUCCESS:
+{
+  "status": "success",
+  "receipt": {
+    "merchant": "Store Name",
+    "date": "2025-10-31",
+    "subtotal": 50.00,
+    "tax": 4.50,
+    "total": 54.50,
+    "category": "food",
+    "items": [
+      {"description": "Coffee", "price": 5.50, "quantity": 2}
+    ],
+    "paymentMethod": "Credit Card",
+    "confidence": "high"
+  },
+  "notes": "Optional notes"
+}
+
+PARTIAL:
+{
+  "status": "partial",
+  "receipt": {
+    "merchant": "Store Name",
+    "date": "2025-10-31",
+    "tax": 0,
+    "total": 54.50,
+    "category": "other",
+    "confidence": "low"
+  },
+  "missingFields": ["subtotal", "items"],
+  "message": "Bottom of receipt is faded",
+  "suggestions": ["Retake photo with better lighting"]
+}
+
+NOT A RECEIPT:
+{
+  "status": "not_a_receipt",
+  "reason": "This appears to be a menu, not a receipt",
+  "suggestion": "Please upload an actual receipt"
+}
+
+UNREADABLE:
+{
+  "status": "unreadable",
+  "reason": "Image is too blurry to read",
+  "suggestions": ["Retake photo with better focus", "Ensure good lighting"]
+}`;
 }

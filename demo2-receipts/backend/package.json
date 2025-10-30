@@ -10,13 +10,14 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.67.0",
-    "@langchain/anthropic": "^1.0.0",
-    "@langchain/core": "^1.0.0",
+    "@langchain/anthropic": "^0.3.0",
+    "@langchain/core": "^0.3.27",
+    "@langchain/openai": "^0.3.16",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "langchain": "^0.3.9",
     "multer": "^1.4.5-lts.1",
-    "langchain": "^1.0.0",
     "opik": "^1.8.0",
     "zod": "^3.22.4",
     "zod-to-json-schema": "^3.22.0"

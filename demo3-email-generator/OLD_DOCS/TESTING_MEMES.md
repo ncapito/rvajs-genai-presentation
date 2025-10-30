@@ -75,7 +75,7 @@ Once you confirm memeSpots are being generated:
      enabled: true,  // ← Change to true
      generationTimeout: 10000,
      fallbackToText: true,
-     dalleDeployment: process.env.AZURE_OPENAI_DALLE_DEPLOYMENT || 'dall-e-3',
+     imageDeployment: process.env.AZURE_OPENAI_DALLE_DEPLOYMENT || 'dall-e-3',
    };
    ```
 

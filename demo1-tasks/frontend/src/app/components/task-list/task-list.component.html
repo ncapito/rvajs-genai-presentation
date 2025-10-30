@@ -4,9 +4,13 @@
       <div class="spinner"></div>
       <p>Loading tasks...</p>
     </div>
-  } @else if (tasks.length === 0) {
+  } @else if (tasks.length === 0 && hasSearched) {
     <div class="empty-state">
       <p>No tasks found matching your criteria.</p>
+    </div>
+  } @else if (tasks.length === 0 && !hasSearched) {
+    <div class="empty-state">
+      <p>Enter a query above to search for tasks using natural language.</p>
     </div>
   } @else {
     <div class="task-count">

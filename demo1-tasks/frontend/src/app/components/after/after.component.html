@@ -1,11 +1,4 @@
 <div class="after-container">
-  <div class="header">
-    <h1>✨ Natural Language Query (AFTER)</h1>
-    <p class="subtitle">
-      Just type what you want in plain English - powered by AI
-    </p>
-  </div>
-
   <div class="query-section">
     <div class="search-box">
       <input
@@ -16,6 +9,15 @@
         class="query-input"
         [disabled]="loading"
       />
+      @if (rawJsonResponse) {
+        <button
+          class="json-toggle-button"
+          (click)="toggleJsonDisplay()"
+          title="{{ showJson ? 'Hide JSON Response' : 'Show JSON Response' }}"
+        >
+          📋
+        </button>
+      }
       <button
         (click)="executeQuery()"
         [disabled]="!query.trim() || loading"
@@ -38,6 +40,15 @@
     @if (error) {
       <div class="error-message">
         ❌ {{ error }}
+      </div>
+    }
+
+    @if (showJson && rawJsonResponse) {
+      <div class="json-display">
+        <div class="json-header">
+          <strong>🔍 Raw API Response:</strong>
+        </div>
+        <pre class="json-content">{{ getFormattedJson() }}</pre>
       </div>
     }
   </div>
@@ -69,17 +80,54 @@
     <app-task-list
       [tasks]="tasks"
       [loading]="loading"
+      [hasSearched]="hasSearched"
     ></app-task-list>
   </div>
-
-  <div class="benefits">
-    <h3>✨ Benefits of Natural Language</h3>
-    <ul>
-      <li>📝 <strong>Type naturally</strong> - no need to learn complex UI</li>
-      <li>🤖 <strong>AI-powered</strong> - understands context and intent</li>
-      <li>💬 <strong>Asks for clarification</strong> - when ambiguous (try "Show me Sarah's tasks")</li>
-      <li>🛡️ <strong>Safe</strong> - rejects dangerous queries (try "Delete all tasks")</li>
-      <li>⚡ <strong>10 lines of UI</strong> instead of 100+</li>
-    </ul>
+  <div class="data-model-section">
+    <h3>📊 Task Data Model</h3>
+    <p class="data-model-description">
+      Our system can filter by these fields. The LLM is constrained to only use these valid fields:
+    </p>
+    <div class="schema-grid">
+      <div class="schema-field">
+        <div class="field-name">assignee</div>
+        <div class="field-type">string</div>
+        <div class="field-example">e.g., "Sarah Chen"</div>
+      </div>
+      <div class="schema-field">
+        <div class="field-name">status</div>
+        <div class="field-type">"todo" | "in-progress" | "done"</div>
+        <div class="field-example">e.g., "in-progress"</div>
+      </div>
+      <div class="schema-field">
+        <div class="field-name">priority</div>
+        <div class="field-type">"low" | "medium" | "high"</div>
+        <div class="field-example">e.g., "high"</div>
+      </div>
+      <div class="schema-field">
+        <div class="field-name">dueDate</div>
+        <div class="field-type">{{ '{' }} before?: string, after?: string {{ '}' }}</div>
+        <div class="field-example">e.g., before: "2025-10-30"</div>
+      </div>
+    </div>
+    <p class="schema-note">
+      ⚠️ Fields like <code>tags</code>, <code>category</code>, or <code>project</code> don't exist.
+      Without proper constraints, the LLM might hallucinate these fields!
+    </p>
   </div>
+  @if (hasSearched) {
+    <div class="benefits">
+      <h3>✨ Benefits of Natural Language</h3>
+      <ul>
+        <li>📝 <strong>Type naturally</strong> - no need to learn complex UI</li>
+        <li>🤖 <strong>AI-powered</strong> - understands context and intent</li>
+        <li>💬 <strong>Asks for clarification</strong> - when ambiguous (try "Show me Sarah's tasks")</li>
+        <li>🛡️ <strong>Safe</strong> - rejects dangerous queries (try "Delete all tasks")</li>
+        <li>⚡ <strong>10 lines of UI</strong> instead of 100+</li>
+      </ul>
+    </div>
+  }
+
+
 </div>
+

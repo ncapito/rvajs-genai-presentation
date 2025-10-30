@@ -11,6 +11,7 @@ import { Task } from '../../models/task.model';
 export class TaskListComponent {
   @Input() tasks: Task[] = [];
   @Input() loading: boolean = false;
+  @Input() hasSearched: boolean = false;
 
   getStatusBadgeClass(status: string): string {
     switch (status) {

@@ -38,8 +38,8 @@ export const codeLLM = new AzureChatOpenAI({
 // Azure OpenAI client for direct API calls (e.g., DALL-E)
 export const azureImageClient = new AzureOpenAI({
   apiKey: process.env.IMAGE_API_KEY || process.env.AZURE_OPENAI_API_KEY!,
-  endpoint: process.env.IMAGE_ENDPOINT_URL  || process.env.AZURE_OPENAI_ENDPOINT!,
-  apiVersion: process.env.IMAGE_API_VERSION || process.env.AZURE_OPENAI_API_VERSION || "2024-08-01-preview",
+  endpoint: process.env.IMAGE_ENDPOINT_URL  ?? process.env.AZURE_OPENAI_ENDPOINT!,
+  apiVersion: process.env.IMAGE_API_VERSION ?? process.env.AZURE_OPENAI_API_VERSION ?? "2024-08-01-preview",
 });
 
 // Meme generation configuration
@@ -47,5 +47,5 @@ export const memeConfig = {
   enabled: true, // Toggle this for meme generation (ENABLED FOR DEMO!)
   generationTimeout: 3000000, // 3000 seconds (DALL-E can take 10-20s per image)
   fallbackToText: true,
-  dalleDeployment: process.env.IMAGE_DEPLOYMENT_NAME || 'dall-e-3',
+  imageDeployment: process.env.IMAGE_DEPLOYMENT_NAME ?? 'dall-e-3',
 };

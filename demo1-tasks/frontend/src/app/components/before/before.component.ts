@@ -16,6 +16,7 @@ export class BeforeComponent implements OnInit {
   users: User[] = [];
   loading: boolean = false;
   error: string = '';
+  hasSearched: boolean = false;
 
   // Filter form fields
   selectedAssignee: string = '';
@@ -96,6 +97,7 @@ export class BeforeComponent implements OnInit {
 
     this.loading = true;
     this.error = '';
+    this.hasSearched = true;
 
     this.taskService.queryTraditional(query).subscribe({
       next: (response) => {
