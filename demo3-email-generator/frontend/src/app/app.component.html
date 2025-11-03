@@ -79,11 +79,36 @@
       </div>
     </div>
 
+    <!-- Progress Display -->
+    <div *ngIf="progressSteps.length > 0" class="card progress-section">
+      <h3>⚙️ Generation Process</h3>
+      <p class="progress-subtitle">Building personalized email with LangChain + RAG pipeline</p>
+      <div class="progress-steps">
+        <div *ngFor="let step of progressSteps; let i = index"
+             class="progress-step"
+             [class.pending]="step.status === 'pending'"
+             [class.active]="step.status === 'active'"
+             [class.complete]="step.status === 'complete'">
+          <div class="step-indicator">
+            <span *ngIf="step.status === 'pending'" class="step-icon">⏳</span>
+            <span *ngIf="step.status === 'active'" class="step-icon spinner-icon">⚙️</span>
+            <span *ngIf="step.status === 'complete'" class="step-icon">✅</span>
+          </div>
+          <div class="step-content">
+            <div class="step-text">{{ step.step }}</div>
+            <div *ngIf="step.timestamp" class="step-time">
+              {{ step.timestamp | date:'HH:mm:ss.SSS' }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Generated Email -->
     <div *ngIf="generatedEmail" class="card email-result" #emailResult>
       <div class="email-header">
         <h2>
-          {{ isSampleEmail ? '📋 Sample Email (Static)' : '🤖 Generated Email (Live)' }}
+          {{ isSampleEmail ? '📋 Sample Email (Static)' : 'Generated Email' }}
         </h2>
         <div class="email-meta">
           <span class="meta-item">

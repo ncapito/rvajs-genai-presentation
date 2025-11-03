@@ -77,7 +77,10 @@ export async function initializeVectorStore(): Promise<MemoryVectorStore> {
  * Get the existing vector store instance
  * Returns null if RAG is disabled
  */
-export function getVectorStore(): MemoryVectorStore | null {
+export function getVectorStore(): MemoryVectorStore {
+  if (!vectorStoreInstance) {
+    throw new Error('Vector store not initialized');
+  }
   return vectorStoreInstance;
 }
 

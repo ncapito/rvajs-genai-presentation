@@ -37,9 +37,15 @@ import { generateMemesChain } from './meme.chains.js';
  */
 
 /**
+ * Event callback type for SSE progress updates
+ */
+export type EventCallback = (eventType: string, data: any) => void;
+
+/**
  * Creates the full email generation chain with RAG integration
  *
  * @param vectorStore - The initialized vector store for RAG retrieval
+ * @param sendEvent - Optional callback for SSE progress events
  * @returns A composed chain that takes task data and returns a personalized email
  *
  * @example
@@ -56,21 +62,55 @@ import { generateMemesChain } from './meme.chains.js';
  * console.log(result.email.body);
  * ```
  */
-export function createFullEmailChain(vectorStore: MemoryVectorStore) {
+export function createFullEmailChain(vectorStore: MemoryVectorStore, sendEvent?: EventCallback) {
   // Create the RAG chain with vector store dependency
   const relevantCommentsChain = createRelevantCommentsChain(vectorStore);
 
-  // Compose all chains into a single pipeline
-  // The pipe() operator chains them together: output of one → input of next
+  // If sendEvent is provided, we need to manually execute each step to emit events
+  // Otherwise, use the simple piped chain
+  if (sendEvent) {
+    // Return a custom runnable that executes steps with progress events
+    return {
+      async invoke(input: any) {
+        // Step 1: Analyze Activity
+        sendEvent('progress', { message: '📊 Analyzing user activity data...' });
+        const analyzed = await analyzeActivityChain.invoke(input);
+        sendEvent('step_complete', { step: 'analyze', message: '✅ Analyzing user activity data complete' });
+
+        // Step 2: RAG - Retrieve comments
+        sendEvent('progress', { message: '🔍 Retrieving relevant collaboration context (RAG)...' });
+        const withComments = await relevantCommentsChain.invoke(analyzed);
+        sendEvent('step_complete', { step: 'rag', message: '✅ Retrieving relevant collaboration context (RAG) complete' });
+
+        // Step 3: Determine Style
+        sendEvent('progress', { message: '🎨 Determining personalized email style...' });
+        const withStyle = await determineStyleChain.invoke(withComments);
+        sendEvent('step_complete', { step: 'style', message: '✅ Determining personalized email style complete' });
+
+        // Step 4: Generate Email
+        sendEvent('progress', { message: '✍️ Generating email content...' });
+        const withEmail = await generateEmailChain.invoke(withStyle);
+        sendEvent('step_complete', { step: 'generate', message: '✅ Generating email content complete' });
+
+        // Step 5: Convert to HTML (optional - can be uncommented for live demo)
+        // DEMO: Uncomment the lines below to add HTML conversion step
+        const finalResult = withEmail;
+        // sendEvent('progress', { message: '🎨 Converting to HTML format...' });
+        // finalResult = await convertToHTMLChain.invoke(withEmail);
+        // sendEvent('step_complete', { step: 'html', message: '✅ Converting to HTML format complete' });
+
+        return finalResult;
+      }
+    };
+  }
+
+  // Simple piped chain (no SSE)
   return analyzeActivityChain
-    //.pipe(relevantCommentsChain) // Step 2: Add collaboration context via RAG
+    .pipe(relevantCommentsChain) // Step 2: Add collaboration context via RAG
     .pipe(determineStyleChain) // Step 3: Apply business logic for style
     .pipe(generateEmailChain) // Step 4: Generate final email with LLM
     //.pipe(convertToHTMLChain) // Step 5: Convert to HTML with inline styles
     //.pipe(generateMemesChain) // Step 6: Generate meme images (optional)
-
-  //step 5
-  //step 6
 }
 
 // Export individual chains for testing or custom composition

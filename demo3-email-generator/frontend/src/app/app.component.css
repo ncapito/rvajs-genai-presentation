@@ -481,6 +481,96 @@
   font-size: 0.875rem;
 }
 
+/* Progress Section */
+.progress-section {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-left: 4px solid #3498db;
+  margin-bottom: 1.5rem;
+}
+
+.progress-section h3 {
+  color: #2c3e50;
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+}
+
+.progress-subtitle {
+  color: #64748b;
+  margin: 0 0 1.5rem 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.progress-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.progress-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: white;
+  border-radius: 8px;
+  border: 2px solid #e5e7eb;
+  transition: all 0.3s;
+}
+
+.progress-step.pending {
+  opacity: 0.5;
+}
+
+.progress-step.active {
+  border-color: #3498db;
+  background: #eff6ff;
+  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.2);
+}
+
+.progress-step.complete {
+  border-color: #27ae60;
+  background: #f0fdf4;
+}
+
+.step-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+}
+
+.step-icon {
+  font-size: 1.5rem;
+}
+
+.spinner-icon {
+  animation: spin 2s linear infinite;
+}
+
+.step-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.step-text {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 0.95rem;
+}
+
+.step-time {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-family: monospace;
+  background: #f1f5f9;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
 /* Loading Spinner */
 .loading {
   text-align: center;

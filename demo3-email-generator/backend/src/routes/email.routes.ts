@@ -45,64 +45,108 @@ router.get('/users/:userId', (req: Request, res: Response) => {
 /**
  * POST /api/generate-email
  * Generate a personalized email for a specific user
+ *
+ * Query param ?stream=true enables SSE streaming with progress updates
  */
 router.post('/generate-email', async (req: Request, res: Response) => {
-  try {
-    const { userId } = req.body;
+  const { userId } = req.body;
+  const useStreaming = req.query.stream === 'true';
 
-    if (!userId) {
-      return res.status(400).json({ error: 'userId is required' });
-    }
+  if (!userId) {
+    return res.status(400).json({ error: 'userId is required' });
+  }
 
-    // Find user
-    const user = users.find((u) => u.id === userId);
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
+  // Find user
+  const user = users.find((u) => u.id === userId);
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
 
-    console.log(`Generating email for ${user.name} (${user.userType})...`);
+  // Get vector store
+  const vectorStore = getVectorStore();
 
-    // Get vector store
-    const vectorStore = getVectorStore();
+  // Prepare input data
+  const input = {
+    user,
+    taskActivity: taskData.taskActivity as TaskActivity,
+    recentActivity: taskData.recentActivity,
+    overdueTasks: taskData.overdueTasks,
+    inProgressTasks: taskData.inProgressTasks,
+  };
 
-    // Create the full email chain with RAG
-    const emailChain = createFullEmailChain(vectorStore);
+  if (useStreaming) {
+    // SSE streaming mode
+    console.log(`[SSE] Generating email for ${user.name} (${user.userType})...`);
 
-    // Prepare input data
-    const input = {
-      user,
-      taskActivity: taskData.taskActivity as TaskActivity,
-      recentActivity: taskData.recentActivity,
-      overdueTasks: taskData.overdueTasks,
-      inProgressTasks: taskData.inProgressTasks,
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    const sendEvent = (eventType: string, data: any) => {
+      res.write(`event: ${eventType}\n`);
+      res.write(`data: ${JSON.stringify(data)}\n\n`);
     };
 
-    // Invoke the chain
-    const startTime = Date.now();
-    const result = await emailChain.invoke(input);
-    const duration = Date.now() - startTime;
+    try {
+      const startTime = Date.now();
+      const emailChain = createFullEmailChain(vectorStore!, sendEvent);
+      const result = await emailChain.invoke(input);
+      const duration = Date.now() - startTime;
 
-    console.log(`Email generated in ${duration}ms for ${user.name}`);
+      // Send final result
+      sendEvent('complete', {
+        success: true,
+        user: {
+          id: user.id,
+          name: user.name,
+          userType: user.userType,
+        },
+        email: result.email,
+        metadata: {
+          generationTime: duration,
+          style: result.emailStyle,
+        },
+      });
 
-    res.json({
-      success: true,
-      user: {
-        id: user.id,
-        name: user.name,
-        userType: user.userType,
-      },
-      email: result.email,
-      metadata: {
-        generationTime: duration,
-        style: result.emailStyle,
-      },
-    });
-  } catch (error: any) {
-    console.error('Error generating email:', error);
-    res.status(500).json({
-      error: 'Failed to generate email',
-      message: error.message,
-    });
+      console.log(`[SSE] Email generated in ${duration}ms for ${user.name}`);
+      res.end();
+    } catch (error: any) {
+      console.error('[SSE] Error generating email:', error);
+      sendEvent('error', { message: error.message });
+      res.end();
+    }
+  } else {
+    // Regular JSON response mode
+    console.log(`Generating email for ${user.name} (${user.userType})...`);
+
+    try {
+      const startTime = Date.now();
+      const emailChain = createFullEmailChain(vectorStore!);
+      const result = await emailChain.invoke(input);
+      const duration = Date.now() - startTime;
+
+      console.log(`Email generated in ${duration}ms for ${user.name}`);
+
+      res.json({
+        success: true,
+        user: {
+          id: user.id,
+          name: user.name,
+          userType: user.userType,
+        },
+        email: result.email,
+        metadata: {
+          generationTime: duration,
+          style: result.emailStyle,
+        },
+      });
+    } catch (error: any) {
+      console.error('Error generating email:', error);
+      res.status(500).json({
+        error: 'Failed to generate email',
+        message: error.message,
+      });
+    }
   }
 });
 
@@ -118,7 +162,7 @@ router.post('/generate-email-batch', async (req: Request, res: Response) => {
     const vectorStore = getVectorStore();
 
     // Create the full email chain
-    const emailChain = createFullEmailChain(vectorStore);
+    const emailChain = createFullEmailChain(vectorStore!);
 
     // Generate emails for all users in parallel
     const startTime = Date.now();

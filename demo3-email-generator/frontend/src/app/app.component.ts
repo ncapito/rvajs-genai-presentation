@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
@@ -22,11 +22,16 @@ export class AppComponent implements OnInit {
   viewMode: 'single' | 'comparison' = 'single';
   isSampleEmail = false; // Track if currently viewing a sample email
 
+  // Progress tracking for long-running operations
+  progressSteps: Array<{ step: string; status: 'pending' | 'active' | 'complete'; timestamp?: Date }> = [];
+  currentStep = 0;
+
   @ViewChild('emailResult') emailResult?: ElementRef;
 
   constructor(
     private emailService: EmailService,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private ngZone: NgZone
   ) {}
 
   ngOnInit() {
@@ -70,17 +75,113 @@ export class AppComponent implements OnInit {
     this.error = null;
     this.isSampleEmail = false;
 
-    this.emailService.generateEmail(this.selectedUser.id).subscribe({
-      next: (response) => {
-        this.generatedEmail = response;
-        this.loading = false;
-        this.scrollToEmail();
+    // Initialize progress steps for SSE
+    this.initializeProgressSteps();
+
+    // Use SSE streaming for real-time progress
+    this.emailService.generateEmailStream(this.selectedUser.id).subscribe({
+      next: (event) => {
+        this.handleSSEEvent(event);
       },
       error: (err) => {
         this.error = 'Failed to generate email';
         this.loading = false;
+        this.progressSteps = [];
         console.error(err);
       },
+      complete: () => {
+        this.loading = false;
+      }
+    });
+  }
+
+  private handleSSEEvent(event: { type: string; data: any }) {
+    console.log('SSE Event received:', event.type, event.data);
+
+    // Run inside Angular zone to trigger change detection
+    this.ngZone.run(() => {
+      switch (event.type) {
+        case 'progress':
+          console.log('Progress event - message:', event.data.message);
+          // Update current step to active based on message
+          this.updateStepFromMessage(event.data.message, 'active');
+          console.log('Progress steps after update:', this.progressSteps);
+          break;
+
+        case 'step_complete':
+          console.log('Step complete event - message:', event.data.message);
+          // Mark step as complete
+          this.updateStepFromMessage(event.data.message, 'complete');
+          console.log('Progress steps after complete:', this.progressSteps);
+          break;
+
+        case 'complete':
+          console.log('Complete event - final result:', event.data);
+          // Final result received
+          this.generatedEmail = event.data;
+          this.completeAllSteps();
+          this.scrollToEmail();
+          break;
+
+        case 'error':
+          console.log('Error event:', event.data.message);
+          this.error = event.data.message;
+          break;
+
+        default:
+          console.log('Unknown event type:', event.type);
+      }
+    });
+  }
+
+  private updateStepFromMessage(message: string, status: 'active' | 'complete') {
+    console.log(`updateStepFromMessage called with: "${message}", status: ${status}`);
+
+    // Map keywords in messages to step indices
+    let stepIndex = -1;
+
+    if (message.includes('Analyzing') || message.includes('activity data')) {
+      stepIndex = 0;
+    } else if (message.includes('Retrieving') || message.includes('collaboration') || message.includes('RAG')) {
+      stepIndex = 1;
+    } else if (message.includes('Determining') || message.includes('style')) {
+      stepIndex = 2;
+    } else if (message.includes('Generating') || message.includes('email content')) {
+      stepIndex = 3;
+    } else if (message.includes('Converting') || message.includes('HTML') || message.includes('Finalizing') || message.includes('finalized') || message.includes('text format')) {
+      stepIndex = 4;
+    }
+
+    if (stepIndex >= 0 && stepIndex < this.progressSteps.length) {
+      console.log(`Matched message to step index ${stepIndex}`);
+      this.progressSteps[stepIndex].status = status;
+      this.progressSteps[stepIndex].timestamp = new Date();
+      console.log(`Updated step ${stepIndex}:`, this.progressSteps[stepIndex]);
+    } else {
+      console.warn(`No matching step found for message: "${message}"`);
+    }
+  }
+
+  private initializeProgressSteps() {
+    // Default flow: 4 main steps (HTML conversion step can be added during live demo)
+    this.progressSteps = [
+      { step: '📊 Analyzing user activity data', status: 'pending' },
+      { step: '🔍 Retrieving relevant collaboration context (RAG)', status: 'pending' },
+      { step: '🎨 Determining personalized email style', status: 'pending' },
+      { step: '✍️ Generating email content', status: 'pending' },
+      // Optional step 5 - shown only if backend sends HTML conversion events
+      // { step: '🎨 Converting to HTML format', status: 'pending' },
+    ];
+    this.currentStep = 0;
+  }
+
+  private completeAllSteps() {
+    // Mark all remaining steps as complete when done
+    this.progressSteps.forEach(step => {
+      if (step.status !== 'complete') {
+        step.status = 'complete';
+        step.timestamp = new Date();
+      }
     });
   }
 
