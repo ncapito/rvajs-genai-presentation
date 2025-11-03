@@ -165,6 +165,27 @@
       <summary>View Full Task Data (Click to Expand)</summary>
       <pre>{{ taskData | json }}</pre>
     </details>
+
+    <!-- Unpersonalized Email Example (The "Before" - What Everyone Would Get) -->
+    <div *ngIf="!selectedUser" class="unpersonalized-email-section">
+      <div class="unpersonalized-header">
+        <h3>🗂️ The Old Way: Unpersonalized Email</h3>
+      </div>
+      <p class="info-text-warning">
+        Everyone receives the same generic email regardless of their preferences or work style.
+      </p>
+      <div class="unpersonalized-email-preview">
+        <div class="email-subject-boring">
+          <strong>Subject:</strong> {{ unpersonalizedEmail.subject }}
+        </div>
+        <div class="email-body-boring">
+          <pre>{{ unpersonalizedEmail.body }}</pre>
+        </div>
+      </div>
+      <p class="comparison-note">
+        👆 <strong>Compare this</strong> to the personalized emails above - same data, completely different approach!
+      </p>
+    </div>
   </div>
   </div>
 

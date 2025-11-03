@@ -26,6 +26,28 @@ export class AppComponent implements OnInit {
   // Progress tracking for long-running operations
   progressSteps: Array<{ step: string; message: string; status: 'pending' | 'active' | 'complete'; timestamp?: Date }> = [];
 
+  // Example of the "old way" - unpersonalized, boring email
+  unpersonalizedEmail = {
+    subject: 'Weekly Task Summary Report',
+    body: `Dear Team Member,
+
+This is your automated weekly task summary report.
+
+TASK STATISTICS:
+- Total Completed: 23
+- In Progress: 8
+- Overdue: 4
+- Total Comments: 15
+
+Please review your tasks and update their status accordingly. If you have any overdue items, please prioritize them.
+
+For questions, please contact your project manager.
+
+Best regards,
+Task Management System
+(Automated Message - Do Not Reply)`
+  };
+
   @ViewChild('emailResult') emailResult?: ElementRef;
 
   constructor(

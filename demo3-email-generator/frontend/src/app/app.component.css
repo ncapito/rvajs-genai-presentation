@@ -634,6 +634,94 @@ body:has(.email-comparison-card.expanded) {
   font-size: 0.875rem;
 }
 
+/* Unpersonalized Email Section - The "Boring" Old Way */
+.unpersonalized-email-section {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 3px dashed #d1d5db;
+}
+
+.unpersonalized-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.unpersonalized-header h3 {
+  margin: 0;
+  color: #6b7280;
+  font-size: 1.25rem;
+}
+
+.boring-badge {
+  background: #fef2f2;
+  color: #dc2626;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.875rem;
+  border: 2px solid #fca5a5;
+  margin: 0;
+}
+
+.info-text-warning {
+  color: #92400e;
+  font-weight: 600;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: #fef3c7;
+  border-radius: 6px;
+  border-left: 4px solid #f59e0b;
+}
+
+.unpersonalized-email-preview {
+  background: #f3f4f6;
+  border: 2px solid #9ca3af;
+  border-radius: 8px;
+  padding: 20px;
+  font-family: 'Courier New', monospace;
+}
+
+.email-subject-boring {
+  font-size: 0.95rem;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #d1d5db;
+  color: #374151;
+}
+
+.email-body-boring {
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 16px;
+}
+
+.email-body-boring pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: 'Courier New', monospace;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  margin: 0;
+  color: #4b5563;
+}
+
+.comparison-note {
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: #dbeafe;
+  border-left: 4px solid #3b82f6;
+  border-radius: 6px;
+  color: #1e40af;
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 0;
+}
+
 /* Progress Section */
 .progress-section {
   background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
