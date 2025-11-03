@@ -9,6 +9,7 @@ import type {
   Email,
   MemeSpot
 } from '../schemas/email.schema.js';
+import type { EventCallback } from './index.js';
 
 /**
  * Step 6 (Optional): Generate meme images using DALL-E 3
@@ -18,12 +19,15 @@ import type {
  * 2. Generates images for each spot using DALL-E 3
  * 3. Injects the images into the HTML email
  * 4. Falls back to text if generation fails (graceful degradation)
+ *
+ * @param sendEvent - Optional callback for SSE progress events
  */
-export const generateMemesChain = RunnableLambda.from(async (input: {
+export function buildGenerateMemesChain(sendEvent: EventCallback = () => {}) {
+  return RunnableLambda.from(async (input: {
   user: UserProfile;
   taskActivity: TaskActivity;
   activityAnalysis: string;
-  collaborationContext: string[];
+  collaborationContext?: string[];
   emailStyle: EmailStyle;
   email: Email;
   recentActivity: any[];
@@ -50,6 +54,7 @@ export const generateMemesChain = RunnableLambda.from(async (input: {
     return input;
   }
 
+  sendEvent('progress', { step: 'memes', message: '🎨 Generating meme images' });
   logChainStep(6, 'Generate Memes', undefined, `${email.memeSpots.length} images with ${imageProvider.name}`);
   const timer = new StepTimer('Meme Generation');
 
@@ -151,6 +156,7 @@ export const generateMemesChain = RunnableLambda.from(async (input: {
 
     console.log(`  Final body length: ${updatedBody.length} characters`);
     timer.end();
+    sendEvent('step_complete', { step: 'memes', message: '✅ Generating meme images complete' });
 
     return {
       ...input,
@@ -166,7 +172,11 @@ export const generateMemesChain = RunnableLambda.from(async (input: {
     // Return original email (complete fallback)
     return input;
   }
-});
+  });
+}
+
+// Keep old export for backward compatibility
+export const generateMemesChain = buildGenerateMemesChain();
 
 // Note: Image generation is now handled by the imageProvider abstraction
 // See src/services/image-providers.ts for implementation details

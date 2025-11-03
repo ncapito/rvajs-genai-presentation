@@ -2,6 +2,7 @@ import { RunnableLambda } from '@langchain/core/runnables';
 import type { EmailStyle } from '../schemas/email.schema.js';
 import type { RelevantCommentsOutput } from './relevant-comments.chain.js';
 import { logChainStep, StepTimer } from '../utils/logging.utils.js';
+import type { EventCallback } from './index.js';
 
 /**
  * Step 3: Determine Style Chain (Business Logic)
@@ -58,33 +59,42 @@ const USER_TYPE_STYLE_MAP: Record<string, EmailStyle> = {
 /**
  * Determines the email style based on user type and preferences
  *
+ * @param sendEvent - Optional callback for SSE progress events
  * This is pure business logic - no LLM needed!
  */
-export const determineStyleChain = RunnableLambda.from(
-  async (input: RelevantCommentsOutput): Promise<DetermineStyleOutput> => {
-    const { user } = input;
-    const userType = user.userType;
-    const preferences = user.preferences;
+export function buildDetermineStyleChain(sendEvent: EventCallback = () => {}) {
+  return RunnableLambda.from(
+    async (input: RelevantCommentsOutput): Promise<DetermineStyleOutput> => {
+      const { user } = input;
+      const userType = user.userType;
+      const preferences = user.preferences;
 
-    logChainStep(3, 'Determine Style', undefined, `User type: ${userType}`);
-    const timer = new StepTimer('Style Determination');
+      sendEvent('progress', { step: 'style', message: '🎨 Determining personalized email style' });
+      logChainStep(3, 'Determine Style', undefined, `User type: ${userType}`);
+      const timer = new StepTimer('Style Determination');
 
-    // Look up style configuration for this user type
-    const baseStyle = USER_TYPE_STYLE_MAP[userType] || USER_TYPE_STYLE_MAP['action-focused'];
+      // Look up style configuration for this user type
+      const baseStyle = USER_TYPE_STYLE_MAP[userType] || USER_TYPE_STYLE_MAP['action-focused'];
 
-    // Override with user-specific preferences if present
-    const emailStyle: EmailStyle = {
-      ...baseStyle,
-      // Override includeMemes if user has explicit preference
-      includeMemes: preferences.includeMemes ?? baseStyle.includeMemes,
-    };
+      // Override with user-specific preferences if present
+      const emailStyle: EmailStyle = {
+        ...baseStyle,
+        // Override includeMemes if user has explicit preference
+        includeMemes: preferences.includeMemes ?? baseStyle.includeMemes,
+      };
 
-    console.log(`  Selected style: ${emailStyle.structure} / ${emailStyle.tone}`);
-    timer.end();
+      console.log(`  Selected style: ${emailStyle.structure} / ${emailStyle.tone}`);
+      timer.end();
 
-    return {
-      ...input,
-      emailStyle,
-    };
-  }
-);
+      sendEvent('step_complete', { step: 'style', message: '✅ Determining personalized email style complete' });
+
+      return {
+        ...input,
+        emailStyle,
+      };
+    }
+  );
+}
+
+// Keep old export for backward compatibility
+export const determineStyleChain = buildDetermineStyleChain();

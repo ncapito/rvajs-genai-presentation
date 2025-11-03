@@ -1,10 +1,10 @@
 import type { MemoryVectorStore } from 'langchain/vectorstores/memory';
-import { analyzeActivityChain } from './analyze-activity.chain.js';
-import { createRelevantCommentsChain } from './relevant-comments.chain.js';
-import { determineStyleChain } from './determine-style.chain.js';
-import { generateEmailChain } from './generate-email.chain.js';
-import { convertToHTMLChain } from './convert-to-html.chain.js';
-import { generateMemesChain } from './meme.chains.js';
+import { buildAnalyzeActivityChain } from "./analyze-activity.chain.js";
+import { buildRelevantCommentsChain, createRelevantCommentsChain } from './relevant-comments.chain.js';
+import { buildDetermineStyleChain, determineStyleChain } from './determine-style.chain.js';
+import { buildGenerateEmailChain, generateEmailChain } from './generate-email.chain.js';
+import { buildConvertToHTMLChain, convertToHTMLChain } from './convert-to-html.chain.js';
+import { buildGenerateMemesChain, generateMemesChain } from './meme.chains.js';
 
 /**
  * Email Generation Pipeline
@@ -63,64 +63,28 @@ export type EventCallback = (eventType: string, data: any) => void;
  * ```
  */
 export function createFullEmailChain(vectorStore: MemoryVectorStore, sendEvent?: EventCallback) {
-  // Create the RAG chain with vector store dependency
-  const relevantCommentsChain = createRelevantCommentsChain(vectorStore);
-
-  // If sendEvent is provided, we need to manually execute each step to emit events
-  // Otherwise, use the simple piped chain
-  if (sendEvent) {
-    // Return a custom runnable that executes steps with progress events
-    return {
-      async invoke(input: any) {
-        // Step 1: Analyze Activity
-        sendEvent('progress', { message: '📊 Analyzing user activity data...' });
-        const analyzed = await analyzeActivityChain.invoke(input);
-        sendEvent('step_complete', { step: 'analyze', message: '✅ Analyzing user activity data complete' });
-
-        // Step 2: RAG - Retrieve comments
-        sendEvent('progress', { message: '🔍 Retrieving relevant collaboration context (RAG)...' });
-        const withComments = await relevantCommentsChain.invoke(analyzed);
-        sendEvent('step_complete', { step: 'rag', message: '✅ Retrieving relevant collaboration context (RAG) complete' });
-
-        // Step 3: Determine Style
-        sendEvent('progress', { message: '🎨 Determining personalized email style...' });
-        const withStyle = await determineStyleChain.invoke(withComments);
-        sendEvent('step_complete', { step: 'style', message: '✅ Determining personalized email style complete' });
-
-        // Step 4: Generate Email
-        sendEvent('progress', { message: '✍️ Generating email content...' });
-        const withEmail = await generateEmailChain.invoke(withStyle);
-        sendEvent('step_complete', { step: 'generate', message: '✅ Generating email content complete' });
-
-        // Step 5: Convert to HTML (optional - can be uncommented for live demo)
-        // DEMO: Uncomment the lines below to add HTML conversion step
-        const finalResult = withEmail;
-        // sendEvent('progress', { message: '🎨 Converting to HTML format...' });
-        // finalResult = await convertToHTMLChain.invoke(withEmail);
-        // sendEvent('step_complete', { step: 'html', message: '✅ Converting to HTML format complete' });
-
-        return finalResult;
-      }
-    };
-  }
-
-  // Simple piped chain (no SSE)
-  return analyzeActivityChain
-    .pipe(relevantCommentsChain) // Step 2: Add collaboration context via RAG
-    .pipe(determineStyleChain) // Step 3: Apply business logic for style
-    .pipe(generateEmailChain) // Step 4: Generate final email with LLM
-    //.pipe(convertToHTMLChain) // Step 5: Convert to HTML with inline styles
-    //.pipe(generateMemesChain) // Step 6: Generate meme images (optional)
+  // Simple piped chain with optional SSE events
+  return buildAnalyzeActivityChain(sendEvent)
+    .pipe(buildRelevantCommentsChain(vectorStore, sendEvent)) // Step 2: Add collaboration context via RAG
+    .pipe(buildDetermineStyleChain(sendEvent)) // Step 3: Apply business logic for style
+    .pipe(buildGenerateEmailChain(sendEvent)) // Step 4: Generate final email with LLM
+    .pipe(buildConvertToHTMLChain(sendEvent)) // Step 5: Convert to HTML with inline styles
+    .pipe(buildGenerateMemesChain(sendEvent)) // Step 6: Generate meme images (optional)
 }
 
-// Export individual chains for testing or custom composition
+// Export individual chain builders for testing or custom composition
 export {
-  analyzeActivityChain,
-  createRelevantCommentsChain,
-  determineStyleChain,
-  generateEmailChain,
-  convertToHTMLChain,
-  generateMemesChain,
+  buildAnalyzeActivityChain,
+  buildRelevantCommentsChain,
+  createRelevantCommentsChain, // Keep for backward compatibility
+  buildDetermineStyleChain,
+  determineStyleChain, // Keep for backward compatibility
+  buildGenerateEmailChain,
+  generateEmailChain, // Keep for backward compatibility
+  buildConvertToHTMLChain,
+  convertToHTMLChain, // Keep for backward compatibility
+  buildGenerateMemesChain,
+  generateMemesChain, // Keep for backward compatibility
 };
 
 

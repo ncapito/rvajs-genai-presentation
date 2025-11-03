@@ -1,9 +1,21 @@
+/* App Container - Full page layout */
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f8f9fa;
+  padding-top: 2rem;
+}
+
 .container {
   max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
   background: white;
   padding: 2rem;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  flex: 1;
 }
 
 .header {
@@ -369,6 +381,68 @@
   line-height: 1.6;
 }
 
+/* Loading State for Comparison */
+.comparison-loading {
+  text-align: center;
+}
+
+.loading-text {
+  margin-top: 2rem;
+  font-size: 1.1rem;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+/* Skeleton Loading Animation */
+.loading-skeleton {
+  animation: pulse 1.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.skeleton-header {
+  height: 80px;
+  background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px 8px 0 0;
+  margin: -24px -24px 16px -24px;
+}
+
+.skeleton-content {
+  padding: 1.5rem;
+}
+
+.skeleton-line {
+  height: 16px;
+  background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+
+.skeleton-line:nth-child(2) { width: 80%; }
+.skeleton-line:nth-child(3) { width: 60%; }
+
+.skeleton-box {
+  height: 200px;
+  background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+  margin-top: 16px;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
 /* Comparison Grid */
 .comparison-grid {
   display: grid;
@@ -388,8 +462,16 @@
   border-radius: 8px 8px 0 0;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
   margin: -24px -24px 16px -24px;
+}
+
+.comparison-header .header-text {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
 }
 
 .comparison-icon {
@@ -406,6 +488,77 @@
   opacity: 0.9;
   font-size: 0.875rem;
   text-transform: uppercase;
+}
+
+/* Expand Button */
+.expand-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  line-height: 1;
+  min-width: 40px;
+}
+
+.expand-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+/* Expanded State */
+.email-comparison-card.expanded {
+  position: fixed;
+  top: 5vh;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90vw;
+  max-width: 1200px;
+  height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 1001;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  margin: 0 !important;
+}
+
+.email-comparison-card.expanded .comparison-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.email-comparison-card.expanded .comparison-content .email-body {
+  max-height: none;
+}
+
+/* Prevent body scroll when modal is open */
+body:has(.email-comparison-card.expanded) {
+  overflow: hidden;
+}
+
+/* Backdrop for expanded email */
+.comparison-grid::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.comparison-grid:has(.email-comparison-card.expanded)::after {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .comparison-content {
@@ -619,6 +772,15 @@
 }
 
 @media (max-width: 768px) {
+  .app-container {
+    padding: 1rem 0.5rem;
+  }
+
+  .container {
+    padding: 1rem;
+    border-radius: 8px;
+  }
+
   .header h1 {
     font-size: 1.75rem;
   }
@@ -642,4 +804,28 @@
     margin-left: 0;
     width: 100%;
   }
+}
+
+/* Footer - matches demo1 style */
+.app-footer {
+  background: #2c3e50;
+  color: white;
+  text-align: center;
+  padding: 1.5rem;
+  margin-top: 2rem;
+  width: 100%;
+}
+
+.app-footer p {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 0.95rem;
+}
+
+.app-footer code {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
 }

@@ -21,10 +21,10 @@ export class AppComponent implements OnInit {
   error: string | null = null;
   viewMode: 'single' | 'comparison' = 'single';
   isSampleEmail = false; // Track if currently viewing a sample email
+  expandedEmailId: string | null = null; // Track which email is expanded
 
   // Progress tracking for long-running operations
-  progressSteps: Array<{ step: string; status: 'pending' | 'active' | 'complete'; timestamp?: Date }> = [];
-  currentStep = 0;
+  progressSteps: Array<{ step: string; message: string; status: 'pending' | 'active' | 'complete'; timestamp?: Date }> = [];
 
   @ViewChild('emailResult') emailResult?: ElementRef;
 
@@ -75,8 +75,8 @@ export class AppComponent implements OnInit {
     this.error = null;
     this.isSampleEmail = false;
 
-    // Initialize progress steps for SSE
-    this.initializeProgressSteps();
+    // Reset progress steps - they'll be added dynamically from SSE events
+    this.progressSteps = [];
 
     // Use SSE streaming for real-time progress
     this.emailService.generateEmailStream(this.selectedUser.id).subscribe({
@@ -102,24 +102,23 @@ export class AppComponent implements OnInit {
     this.ngZone.run(() => {
       switch (event.type) {
         case 'progress':
-          console.log('Progress event - message:', event.data.message);
-          // Update current step to active based on message
-          this.updateStepFromMessage(event.data.message, 'active');
-          console.log('Progress steps after update:', this.progressSteps);
+          // Dynamically add or update step based on the step field
+          if (event.data.step) {
+            this.addOrUpdateStep(event.data.step, event.data.message, 'active');
+          }
           break;
 
         case 'step_complete':
-          console.log('Step complete event - message:', event.data.message);
           // Mark step as complete
-          this.updateStepFromMessage(event.data.message, 'complete');
-          console.log('Progress steps after complete:', this.progressSteps);
+          if (event.data.step) {
+            this.addOrUpdateStep(event.data.step, event.data.message, 'complete');
+          }
           break;
 
         case 'complete':
           console.log('Complete event - final result:', event.data);
           // Final result received
           this.generatedEmail = event.data;
-          this.completeAllSteps();
           this.scrollToEmail();
           break;
 
@@ -134,55 +133,23 @@ export class AppComponent implements OnInit {
     });
   }
 
-  private updateStepFromMessage(message: string, status: 'active' | 'complete') {
-    console.log(`updateStepFromMessage called with: "${message}", status: ${status}`);
+  private addOrUpdateStep(step: string, message: string, status: 'active' | 'complete') {
+    // Check if step already exists (using step as unique identifier)
+    const existingIndex = this.progressSteps.findIndex(s => s.step === step);
 
-    // Map keywords in messages to step indices
-    let stepIndex = -1;
-
-    if (message.includes('Analyzing') || message.includes('activity data')) {
-      stepIndex = 0;
-    } else if (message.includes('Retrieving') || message.includes('collaboration') || message.includes('RAG')) {
-      stepIndex = 1;
-    } else if (message.includes('Determining') || message.includes('style')) {
-      stepIndex = 2;
-    } else if (message.includes('Generating') || message.includes('email content')) {
-      stepIndex = 3;
-    } else if (message.includes('Converting') || message.includes('HTML') || message.includes('Finalizing') || message.includes('finalized') || message.includes('text format')) {
-      stepIndex = 4;
-    }
-
-    if (stepIndex >= 0 && stepIndex < this.progressSteps.length) {
-      console.log(`Matched message to step index ${stepIndex}`);
-      this.progressSteps[stepIndex].status = status;
-      this.progressSteps[stepIndex].timestamp = new Date();
-      console.log(`Updated step ${stepIndex}:`, this.progressSteps[stepIndex]);
+    if (existingIndex >= 0) {
+      // Update existing step - keep original message, just update status
+      this.progressSteps[existingIndex].status = status;
+      this.progressSteps[existingIndex].timestamp = new Date();
     } else {
-      console.warn(`No matching step found for message: "${message}"`);
+      // Add new step
+      this.progressSteps.push({
+        step: step,
+        message: message,
+        status: status,
+        timestamp: new Date()
+      });
     }
-  }
-
-  private initializeProgressSteps() {
-    // Default flow: 4 main steps (HTML conversion step can be added during live demo)
-    this.progressSteps = [
-      { step: '📊 Analyzing user activity data', status: 'pending' },
-      { step: '🔍 Retrieving relevant collaboration context (RAG)', status: 'pending' },
-      { step: '🎨 Determining personalized email style', status: 'pending' },
-      { step: '✍️ Generating email content', status: 'pending' },
-      // Optional step 5 - shown only if backend sends HTML conversion events
-      // { step: '🎨 Converting to HTML format', status: 'pending' },
-    ];
-    this.currentStep = 0;
-  }
-
-  private completeAllSteps() {
-    // Mark all remaining steps as complete when done
-    this.progressSteps.forEach(step => {
-      if (step.status !== 'complete') {
-        step.status = 'complete';
-        step.timestamp = new Date();
-      }
-    });
   }
 
   viewSampleEmail(format: 'text' | 'html') {
@@ -240,6 +207,15 @@ export class AppComponent implements OnInit {
 
   switchViewMode(mode: 'single' | 'comparison') {
     this.viewMode = mode;
+    this.expandedEmailId = null; // Reset expansion when switching modes
+  }
+
+  toggleEmailExpansion(emailId: string) {
+    this.expandedEmailId = this.expandedEmailId === emailId ? null : emailId;
+  }
+
+  isEmailExpanded(emailId: string): boolean {
+    return this.expandedEmailId === emailId;
   }
 
   getUserTypeColor(userType: string): string {

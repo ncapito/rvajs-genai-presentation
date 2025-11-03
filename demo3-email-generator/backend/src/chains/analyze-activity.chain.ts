@@ -7,6 +7,7 @@ import {
   getAnalyzeActivityUserPrompt,
 } from '../prompts/email-generation.prompts.js';
 import { logChainStep, StepTimer } from '../utils/logging.utils.js';
+import { EventCallback } from './index.js';
 
 /**
  * Step 1: Analyze Activity Chain
@@ -33,12 +34,11 @@ export interface AnalyzeActivityOutput extends AnalyzeActivityInput {
   activityAnalysis: string;
 }
 
-export const analyzeActivityChain = RunnableLambda.from(
-  async (input: AnalyzeActivityInput): Promise<AnalyzeActivityOutput> => {
+export function buildAnalyzeActivityChain(sendEvent: EventCallback = () => {}){
+ return RunnableLambda.from(
+  async (input: AnalyzeActivityInput,): Promise<AnalyzeActivityOutput> => {
     const { taskActivity, recentActivity, overdueTasks, inProgressTasks } = input;
-
-    logChainStep(1, 'Analyze Activity', azureLLM, `Analyzing ${taskActivity.assigned} tasks`);
-    const timer = new StepTimer('Activity Analysis');
+    sendEvent("progress", { step: "analyze", message: "📊 Analyzing user activity data" });
 
     // Get prompts from centralized location
     const systemPrompt = getAnalyzeActivitySystemPrompt();
@@ -52,12 +52,16 @@ export const analyzeActivityChain = RunnableLambda.from(
     // Invoke LLM to analyze the activity
     const messages = [new SystemMessage(systemPrompt), new HumanMessage(userPrompt)];
     const response = await azureLLM.invoke(messages);
-
-    timer.end();
-
+    sendEvent("step_complete", {
+         step: "analyze",
+         message: "✅ Analyzing user activity data complete",
+       });
     return {
       ...input,
       activityAnalysis: response.content as string,
     };
   }
 );
+  
+}
+

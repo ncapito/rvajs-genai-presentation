@@ -105,27 +105,44 @@ export class EmailService {
             throw new Error('No response body');
           }
 
+          let buffer = ''; // Buffer for incomplete messages
+
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
 
-            const chunk = decoder.decode(value);
-            const lines = chunk.split('\n\n');
+            // Append new data to buffer
+            buffer += decoder.decode(value, { stream: true });
 
-            for (const line of lines) {
-              if (!line.trim()) continue;
+            // Split by SSE message boundary (\n\n)
+            const messages = buffer.split('\n\n');
 
-              const eventMatch = line.match(/^event: (.+)$/m);
-              const dataMatch = line.match(/^data: (.+)$/m);
+            // Keep the last (potentially incomplete) message in the buffer
+            buffer = messages.pop() || '';
 
-              if (eventMatch && dataMatch) {
+            // Process complete messages
+            for (const message of messages) {
+              if (!message.trim()) continue;
+
+              const eventMatch = message.match(/^event: (.+)$/m);
+
+              // Handle multiple data: lines (for large payloads split across lines)
+              const dataLines = message.match(/^data: (.+)$/gm);
+
+              if (eventMatch && dataLines) {
                 const eventType = eventMatch[1];
-                const data = JSON.parse(dataMatch[1]);
-                observer.next({ type: eventType, data });
+                // Concatenate all data lines (SSE spec: multiple data lines are joined)
+                const concatenatedData = dataLines.map(l => l.substring(6)).join('');
+                try {
+                  const data = JSON.parse(concatenatedData);
+                  observer.next({ type: eventType, data });
 
-                if (eventType === 'complete') {
-                  observer.complete();
-                  return;
+                  if (eventType === 'complete') {
+                    observer.complete();
+                    return;
+                  }
+                } catch (error) {
+                  console.error('Failed to parse SSE data:', error);
                 }
               }
             }

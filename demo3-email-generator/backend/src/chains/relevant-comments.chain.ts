@@ -2,6 +2,7 @@ import { RunnableLambda } from '@langchain/core/runnables';
 import type { MemoryVectorStore } from 'langchain/vectorstores/memory';
 import type { AnalyzeActivityOutput } from './analyze-activity.chain.js';
 import { logChainStep, StepTimer } from '../utils/logging.utils.js';
+import type { EventCallback } from './index.js';
 
 /**
  * Step 2: Relevant Comments Chain (RAG)
@@ -28,13 +29,15 @@ export interface RelevantCommentsOutput extends AnalyzeActivityOutput {
  * Creates a chain that retrieves relevant comments using RAG
  *
  * @param vectorStore - The initialized vector store containing comment embeddings
+ * @param sendEvent - Optional callback for SSE progress events
  * @returns A runnable chain that adds collaboration context to the input
  */
-export function createRelevantCommentsChain(vectorStore: MemoryVectorStore) {
+export function buildRelevantCommentsChain(vectorStore: MemoryVectorStore, sendEvent: EventCallback = () => {}) {
   return RunnableLambda.from(
     async (input: AnalyzeActivityOutput): Promise<RelevantCommentsOutput> => {
       const { user } = input;
 
+      sendEvent('progress', { step: 'rag', message: '🔍 Retrieving relevant collaboration context (RAG)' });
       logChainStep(2, 'RAG Retrieval', undefined, `Using embeddings: ${process.env.AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT || 'default'}`);
       const timer = new StepTimer('RAG Retrieval');
 
@@ -60,6 +63,8 @@ export function createRelevantCommentsChain(vectorStore: MemoryVectorStore) {
         }
         timer.end();
 
+        sendEvent('step_complete', { step: 'rag', message: '✅ Retrieving relevant collaboration context (RAG) complete' });
+
         return {
           ...input,
           collaborationContext: relevantComments.map((doc) => doc.pageContent),
@@ -76,6 +81,11 @@ export function createRelevantCommentsChain(vectorStore: MemoryVectorStore) {
       }
     }
   );
+}
+
+// Keep old function for backward compatibility
+export function createRelevantCommentsChain(vectorStore: MemoryVectorStore) {
+  return buildRelevantCommentsChain(vectorStore);
 }
 
 

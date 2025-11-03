@@ -1,3 +1,4 @@
+<div class="app-container">
 <div class="container">
   <!-- Header with View Mode Toggle -->
   <div class="header-with-toggle">
@@ -95,7 +96,7 @@
             <span *ngIf="step.status === 'complete'" class="step-icon">✅</span>
           </div>
           <div class="step-content">
-            <div class="step-text">{{ step.step }}</div>
+            <div class="step-text">{{ step.message }}</div>
             <div *ngIf="step.timestamp" class="step-time">
               {{ step.timestamp | date:'HH:mm:ss.SSS' }}
             </div>
@@ -176,15 +177,40 @@
       <p>You'll see how the same task data produces completely different emails based on user preferences!</p>
     </div>
 
+    <!-- Loading State for Comparison -->
+    <div *ngIf="loading && allEmails.length === 0" class="comparison-loading">
+      <div class="comparison-grid">
+        <div *ngFor="let i of [1, 2, 3, 4]" class="card email-comparison-card loading-skeleton">
+          <div class="skeleton-header"></div>
+          <div class="skeleton-content">
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-box"></div>
+          </div>
+        </div>
+      </div>
+      <p class="loading-text">🔄 Generating personalized emails for all users...</p>
+    </div>
+
     <!-- Comparison Grid -->
     <div *ngIf="allEmails.length > 0" class="comparison-grid">
-    <div *ngFor="let emailResult of allEmails" class="card email-comparison-card">
+    <div *ngFor="let emailResult of allEmails" class="card email-comparison-card" [class.expanded]="isEmailExpanded(emailResult.user.id)">
       <div class="comparison-header" [style.background]="getUserTypeColor(emailResult.user.userType)">
-        <span class="comparison-icon">{{ getUserTypeIcon(emailResult.user.userType) }}</span>
-        <div>
-          <h3>{{ emailResult.user.name }}</h3>
-          <p>{{ emailResult.user.userType }}</p>
+        <div class="header-text">
+          <span class="comparison-icon">{{ getUserTypeIcon(emailResult.user.userType) }}</span>
+          <div>
+            <h3>{{ emailResult.user.name }}</h3>
+            <p>{{ emailResult.user.userType }}</p>
+          </div>
         </div>
+        <button
+          class="expand-btn"
+          (click)="toggleEmailExpansion(emailResult.user.id)"
+          [attr.aria-label]="isEmailExpanded(emailResult.user.id) ? 'Collapse email' : 'Expand email'">
+          <span *ngIf="!isEmailExpanded(emailResult.user.id)">⤢</span>
+          <span *ngIf="isEmailExpanded(emailResult.user.id)">&times;</span>
+        </button>
       </div>
 
       <div class="comparison-content">
@@ -215,4 +241,12 @@
   <div *ngIf="error" class="error">
     {{ error }}
   </div>
+</div>
+
+<footer class="app-footer">
+  <p>
+    Demo 3 of 3 - GenAI Presentation
+    | Backend: <code>http://localhost:3003</code>
+  </p>
+</footer>
 </div>

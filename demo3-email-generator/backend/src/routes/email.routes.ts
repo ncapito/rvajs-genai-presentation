@@ -83,8 +83,25 @@ router.post('/generate-email', async (req: Request, res: Response) => {
     res.setHeader('Connection', 'keep-alive');
 
     const sendEvent = (eventType: string, data: any) => {
+      const jsonData = JSON.stringify(data);
       res.write(`event: ${eventType}\n`);
-      res.write(`data: ${JSON.stringify(data)}\n\n`);
+
+      // For large payloads, split into multiple data: lines (max ~8KB per line)
+      const chunkSize = 8000;
+      if (jsonData.length > chunkSize) {
+        for (let i = 0; i < jsonData.length; i += chunkSize) {
+          const chunk = jsonData.substring(i, i + chunkSize);
+          res.write(`data: ${chunk}\n`);
+        }
+        res.write('\n');
+      } else {
+        res.write(`data: ${jsonData}\n\n`);
+      }
+
+      // Flush the response to ensure data is sent immediately
+      if (typeof (res as any).flush === 'function') {
+        (res as any).flush();
+      }
     };
 
     try {
@@ -155,11 +172,20 @@ router.post('/generate-email', async (req: Request, res: Response) => {
  * Generate emails for all users at once
  */
 router.post('/generate-email-batch', async (req: Request, res: Response) => {
+  const skipMemes = req.body.skipMemes ?? false; // Generate memes by default
+  const memeConfigModule = require('../config/azure.config.js');
+  const originalMemeEnabled = memeConfigModule.memeConfig.enabled;
+
   try {
-    console.log('Generating emails for all users...');
+    console.log(`Generating emails for all users... (skipMemes: ${skipMemes})`);
 
     // Get vector store
     const vectorStore = getVectorStore();
+
+    // Temporarily disable memes for batch if requested
+    if (skipMemes) {
+      memeConfigModule.memeConfig.enabled = false;
+    }
 
     // Create the full email chain
     const emailChain = createFullEmailChain(vectorStore!);
@@ -207,6 +233,9 @@ router.post('/generate-email-batch', async (req: Request, res: Response) => {
     const duration = Date.now() - startTime;
     console.log(`All emails generated in ${duration}ms`);
 
+    // Restore original meme config
+    memeConfigModule.memeConfig.enabled = originalMemeEnabled;
+
     res.json({
       success: true,
       results,
@@ -218,6 +247,10 @@ router.post('/generate-email-batch', async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error('Error generating batch emails:', error);
+
+    // Restore original meme config even on error
+    memeConfigModule.memeConfig.enabled = originalMemeEnabled;
+
     res.status(500).json({
       error: 'Failed to generate batch emails',
       message: error.message,

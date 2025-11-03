@@ -18,12 +18,12 @@ export interface ImageGenerationProvider {
 }
 
 // DALL-E Provider (current implementation)
-export class DalleProvider implements ImageGenerationProvider {
-  name = 'DALL-E 3';
+export class AzureFoundryProvider implements ImageGenerationProvider {
+  name = 'Azure Foundry';
 
   async generateImage(prompt: string, timeout: number): Promise<string | null> {
     try {
-      console.log(`  🖼️  DALL-E Request:`);
+      console.log(`  🖼️  Image Generation Request:`);
       console.log(`     Model: ${memeConfig.imageDeployment}`);
       console.log(`     Endpoint: ${process.env.IMAGE_ENDPOINT_URL || process.env.AZURE_OPENAI_ENDPOINT}`);
       console.log(`     Timeout: ${timeout}ms`);
@@ -99,16 +99,15 @@ export class DalleProvider implements ImageGenerationProvider {
 
 // Provider Factory
 export function getImageProvider(): ImageGenerationProvider {
-  const providerName = process.env.IMAGE_PROVIDER || 'dalle';
+  const providerName = process.env.IMAGE_PROVIDER || "azurefoundry";
 
   switch (providerName.toLowerCase()) {
-    case 'dalle':
-    case 'dall-e':
-      return new DalleProvider();
+    case 'azurefoundry':
+      return new AzureFoundryProvider();
 
     default:
       console.warn(`Unknown provider "${providerName}", using DALL-E`);
-      return new DalleProvider();
+      return new AzureFoundryProvider();
   }
 }
 
