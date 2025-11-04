@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import {
   Task,
   User,
@@ -38,6 +39,16 @@ export class TaskService {
     return this.http.post<TraditionalQueryResponse>(
       `${this.baseUrl}/query/traditional`,
       query
+    ).pipe(
+      catchError((error: HttpErrorResponse) => {
+        // For traditional queries, return error response
+        return of({
+          success: false,
+          approach: 'traditional',
+          data: [],
+          error: error.error?.error || 'Network error occurred'
+        } as TraditionalQueryResponse);
+      })
     );
   }
 
@@ -48,6 +59,21 @@ export class TaskService {
     return this.http.post<NaturalQueryResponse>(
       `${this.baseUrl}/query/natural`,
       { query }
+    ).pipe(
+      catchError((error: HttpErrorResponse) => {
+        // If the backend returns a 400 with error details, extract and return them
+        if (error.status === 400 && error.error) {
+          return of(error.error as NaturalQueryResponse);
+        }
+
+        // For other errors, return a generic error response
+        return of({
+          success: false,
+          approach: 'natural-language',
+          error: error.error?.error || 'Network error occurred',
+          originalQuery: query
+        } as NaturalQueryResponse);
+      })
     );
   }
 }

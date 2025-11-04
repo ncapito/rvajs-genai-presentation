@@ -264,6 +264,3 @@ By the end of this live coding section, the audience should understand:
 4. **Slow down**: Pause after each concept for comprehension
 5. **Check in**: "Does this make sense so far?"
 
----
-
-**Remember**: You know this code inside and out now. Be confident, go slow, and have fun showing off what you built!

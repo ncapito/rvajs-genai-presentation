@@ -12,6 +12,7 @@ export class TaskListComponent {
   @Input() tasks: Task[] = [];
   @Input() loading: boolean = false;
   @Input() hasSearched: boolean = false;
+  @Input() hasError: boolean = false;
 
   getStatusBadgeClass(status: string): string {
     switch (status) {

@@ -36,9 +36,10 @@ export interface QueryResult {
 export interface TraditionalQueryResponse {
   success: boolean;
   approach: 'traditional';
-  query: TaskQuery;
+  query?: TaskQuery;
   data: Task[];
-  count: number;
+  count?: number;
+  error?: string;
 }
 
 export interface NaturalQueryResponse {

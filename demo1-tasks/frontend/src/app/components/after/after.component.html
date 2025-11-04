@@ -29,6 +29,18 @@
           🔍 Search
         }
       </button>
+
+      <div class="ai-toggle-wrapper">
+        <span class="ai-toggle-label">AI </span>
+        <label class="ai-toggle-switch">
+          <input
+            type="checkbox"
+            [checked]="true"
+            (change)="toggleAI()"
+          />
+          <span class="ai-toggle-slider"></span>
+        </label>
+      </div>
     </div>
 
     @if (explanation) {
@@ -76,14 +88,8 @@
     ></app-clarification>
   }
 
-  <div class="results-section">
-    <app-task-list
-      [tasks]="tasks"
-      [loading]="loading"
-      [hasSearched]="hasSearched"
-    ></app-task-list>
-  </div>
-  <div class="data-model-section">
+    @if (!hasSearched || tasks.length === 0) {
+    <div class="data-model-section">
     <h3>📊 Task Data Model</h3>
     <p class="data-model-description">
       Our system can filter by these fields. The LLM is constrained to only use these valid fields:
@@ -115,7 +121,18 @@
       Without proper constraints, the LLM might hallucinate these fields!
     </p>
   </div>
-  @if (hasSearched) {
+}
+
+  <div class="results-section">
+    <app-task-list
+      [tasks]="tasks"
+      [loading]="loading"
+      [hasSearched]="hasSearched"
+      [hasError]="!!error"
+    ></app-task-list>
+  </div>
+
+  @if (false && hasSearched) {
     <div class="benefits">
       <h3>✨ Benefits of Natural Language</h3>
       <ul>

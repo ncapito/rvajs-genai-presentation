@@ -1,0 +1,26 @@
+{
+  "name": "sandbox",
+  "version": "1.0.0",
+  "description": "Sandbox for testing LangChain",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node langchain.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.67.0",
+    "@langchain/anthropic": "^0.3.0",
+    "@langchain/core": "^0.3.27",
+    "@langchain/openai": "^0.3.16",
+    "langchain": "^0.3.9",
+    "dotenv": "^16.4.7",
+    "zod": "^3.22.4",
+    "zod-to-json-schema": "^3.22.0"
+  },
+  "devDependencies": {
+    "@types/multer": "^1.4.11",
+    "@types/node": "^20.10.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  }
+}

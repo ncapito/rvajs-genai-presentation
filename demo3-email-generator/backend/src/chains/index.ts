@@ -68,8 +68,7 @@ export function createFullEmailChain(vectorStore: MemoryVectorStore, sendEvent?:
     .pipe(buildRelevantCommentsChain(vectorStore, sendEvent)) // Step 2: Add collaboration context via RAG
     .pipe(buildDetermineStyleChain(sendEvent)) // Step 3: Apply business logic for style
     .pipe(buildGenerateEmailChain(sendEvent)) // Step 4: Generate final email with LLM
-    .pipe(buildConvertToHTMLChain(sendEvent)) // Step 5: Convert to HTML with inline styles
-    .pipe(buildGenerateMemesChain(sendEvent)) // Step 6: Generate meme images (optional)
+
 }
 
 // Export individual chain builders for testing or custom composition
@@ -88,4 +87,12 @@ export {
 };
 
 
-  
+ 
+
+
+
+    //.pipe(buildConvertToHTMLChain(sendEvent)) // Step 5: Convert to HTML with inline styles
+    //.pipe(buildGenerateMemesChain(sendEvent)) // Step 6: Generate meme images (optional)
+
+
+    //FLUX-1.1-pro

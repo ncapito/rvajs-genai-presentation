@@ -6,7 +6,6 @@ export const ReceiptDataSchema = z.object({
   date: z.string(), // ISO format YYYY-MM-DD
   subtotal: z.number().optional(),
   tax: z.number(),
-  taxPercentage: z.number().optional(), // 👈 Will add this during live coding!
   total: z.number(),
   category: z.enum(['food', 'retail', 'office', 'travel', 'entertainment', 'other']),
   items: z.array(z.object({

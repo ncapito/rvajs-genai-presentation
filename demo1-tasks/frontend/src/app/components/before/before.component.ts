@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { TaskService } from '../../services/task.service';
 import { Task, User, TaskQuery } from '../../models/task.model';
 import { TaskListComponent } from '../task-list/task-list.component';
@@ -18,6 +19,10 @@ export class BeforeComponent implements OnInit {
   error: string = '';
   hasSearched: boolean = false;
 
+  // JSON display state
+  showJson: boolean = false;
+  queryObject: any = null;
+
   // Filter form fields
   selectedAssignee: string = '';
   selectedStatus: string = '';
@@ -28,7 +33,14 @@ export class BeforeComponent implements OnInit {
   statusOptions = ['todo', 'in-progress', 'done'];
   priorityOptions = ['low', 'medium', 'high'];
 
-  constructor(private taskService: TaskService) {}
+  constructor(
+    private taskService: TaskService,
+    private router: Router
+  ) {}
+
+  toggleAI(): void {
+    this.router.navigate(['/after']);
+  }
 
   ngOnInit(): void {
     // Load users for the assignee dropdown
@@ -95,6 +107,9 @@ export class BeforeComponent implements OnInit {
       }
     }
 
+    // Store query object for display
+    this.queryObject = query;
+
     this.loading = true;
     this.error = '';
     this.hasSearched = true;
@@ -104,6 +119,10 @@ export class BeforeComponent implements OnInit {
         this.loading = false;
         if (response.success) {
           this.tasks = response.data;
+        } else if (!response.success && response.error) {
+          // Handle error from backend
+          this.error = response.error;
+          this.tasks = [];
         }
       },
       error: (err) => {
@@ -137,5 +156,22 @@ export class BeforeComponent implements OnInit {
       this.dueDateBefore ||
       this.dueDateAfter
     );
+  }
+
+  /**
+   * Toggle JSON display
+   */
+  toggleJsonDisplay(): void {
+    this.showJson = !this.showJson;
+  }
+
+  /**
+   * Get formatted JSON string
+   */
+  getFormattedJson(): string {
+    if (!this.queryObject) {
+      return '';
+    }
+    return JSON.stringify(this.queryObject, null, 2);
   }
 }

@@ -211,7 +211,18 @@ Respond with JSON:
 
     let analysis;
     try {
-      analysis = JSON.parse(response.content as string);
+      // Extract JSON from markdown code blocks if present
+      let jsonContent = response.content as string;
+
+      // Check for markdown code blocks (```json or ```)
+      if (jsonContent.includes('```')) {
+        const match = jsonContent.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+        if (match && match[1]) {
+          jsonContent = match[1].trim();
+        }
+      }
+
+      analysis = JSON.parse(jsonContent);
     } catch (error) {
      return {
        reasoning: error instanceof Error ? error.message : 'Failed to parse LLM response',

@@ -4,15 +4,15 @@
       <div class="spinner"></div>
       <p>Loading tasks...</p>
     </div>
-  } @else if (tasks.length === 0 && hasSearched) {
+  } @else if (tasks.length === 0 && hasSearched && !hasError) {
     <div class="empty-state">
       <p>No tasks found matching your criteria.</p>
     </div>
-  } @else if (tasks.length === 0 && !hasSearched) {
+  } @else if (tasks.length === 0 && !hasSearched && !hasError) {
     <div class="empty-state">
       <p>Enter a query above to search for tasks using natural language.</p>
     </div>
-  } @else {
+  } @else if (tasks.length > 0) {
     <div class="task-count">
       Found <strong>{{ tasks.length }}</strong> task{{ tasks.length === 1 ? '' : 's' }}
     </div>

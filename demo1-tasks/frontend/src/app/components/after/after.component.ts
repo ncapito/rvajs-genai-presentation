@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { TaskService } from '../../services/task.service';
 import { Task } from '../../models/task.model';
 import { TaskListComponent } from '../task-list/task-list.component';
@@ -39,7 +40,14 @@ export class AfterComponent implements OnInit {
     'Show me Sarah Chen\'s tasks',
   ];
 
-  constructor(private taskService: TaskService) {}
+  constructor(
+    private taskService: TaskService,
+    private router: Router
+  ) {}
+
+  toggleAI(): void {
+    this.router.navigate(['/before']);
+  }
 
   ngOnInit(): void {
     // Load all tasks initially
@@ -96,13 +104,20 @@ export class AfterComponent implements OnInit {
           this.clarificationMessage = response.message || '';
           this.suggestions = response.suggestions || [];
           this.originalQuery = response.originalQuery;
+          this.tasks = []; // Clear tasks
         } else if (response.success && response.data) {
           // Handle success case
           this.tasks = response.data;
           this.explanation = response.explanation || '';
+        } else if (!response.success && response.error) {
+          // Handle error case (like delete attempts, invalid queries, etc.)
+          this.error = response.error;
+          this.tasks = []; // Clear tasks on error
+          this.explanation = ''; // Clear explanation on error
         } else {
-          // Handle error case
-          this.error = response.error || 'An error occurred';
+          // Fallback error
+          this.error = 'An unexpected error occurred';
+          this.tasks = [];
         }
       },
       error: (err) => {
@@ -117,8 +132,8 @@ export class AfterComponent implements OnInit {
    * Handle suggestion selection from clarification component
    */
   onSuggestionSelected(suggestion: string): void {
-    // Replace the ambiguous part with the specific suggestion
-    this.query = this.originalQuery.replace(/sarah/i, suggestion);
+    // Use the suggestion as the new query
+    this.query = suggestion;
     this.needsClarification = false;
     this.executeQuery();
   }

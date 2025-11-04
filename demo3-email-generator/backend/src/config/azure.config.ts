@@ -33,6 +33,8 @@ export const codeLLM = new AzureChatOpenAI({
   azureOpenAIApiDeploymentName: process.env.CODE_DEPLOYMENT || process.env.AZURE_OPENAI_DEPLOYMENT_NAME!,
   azureOpenAIApiVersion: process.env.AZURE_OPENAI_API_VERSION || '2024-08-01-preview',
   temperature: 0.3, // Lower temperature for more deterministic code generation
+  presencePenalty: 0,
+  frequencyPenalty: 0,
 });
 
 // Azure OpenAI client for direct API calls (e.g., DALL-E)

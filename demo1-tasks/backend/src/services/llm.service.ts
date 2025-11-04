@@ -29,7 +29,7 @@ class LLMService {
           },
           {
             role: "user",
-            content: this.buildPrompt(userInput, today),
+            content: this.buildPrompt(userInput, today), //TODOLIVE Demo1: Fix prompt
           },
         ],
         response_format: { type: "json_object" },

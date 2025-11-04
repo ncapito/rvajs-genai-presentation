@@ -135,11 +135,3 @@ Expected response:
 
 - **routes/** - API endpoints
   - `tasks.routes.ts` - All task-related endpoints
-
-## Key Features
-
-1. **Discriminated Unions** - Uses Zod discriminated unions to handle success/clarification/invalid states
-2. **Prompt Engineering** - Carefully crafted prompts with safety rules and examples
-3. **Ambiguity Handling** - Detects ambiguous queries (e.g., multiple users with same name) and asks for clarification
-4. **Type Safety** - Full TypeScript with Zod validation
-5. **Before/After Comparison** - Side-by-side traditional vs GenAI approaches

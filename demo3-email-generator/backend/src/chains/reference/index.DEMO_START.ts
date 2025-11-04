@@ -1,8 +1,8 @@
 import type { MemoryVectorStore } from 'langchain/vectorstores/memory';
-import { analyzeActivityChain } from './analyze-activity.chain.js';
+import { analyzeActivityChain } from '../analyze-activity.chain.js';
 // import { createRelevantCommentsChain } from './relevant-comments.chain.js';  // ← LIVE CODE: Uncomment this
-import { determineStyleChain } from './determine-style.chain.js';
-import { generateEmailChain } from './generate-email.chain.js';
+import { determineStyleChain } from '../determine-style.chain.js';
+import { generateEmailChain } from '../generate-email.chain.js';
 
 /**
  * DEMO START VERSION - WITHOUT RAG

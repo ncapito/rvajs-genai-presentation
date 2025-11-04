@@ -77,7 +77,7 @@ const TOOLS: Anthropic.Tool[] = [
 /**
  * Matching service that uses Claude with tool calling and streams progress via SSE
  */
-class MatchingService {
+class ToolService {
   private client: Anthropic | null = null;
 
   /**
@@ -91,7 +91,148 @@ class MatchingService {
   }
 
   /**
-   * Match a receipt to a task using Claude with tool calling
+   * SIMPLE VERSION - Match receipt to task using Claude with tool calling
+   * Returns the result directly without SSE streaming
+   * Perfect for demos to show how simple tool calling really is!
+   */
+  async matchReceiptToTaskSimple(receipt: ReceiptData): Promise<{
+    reasoning: string;
+    toolCalls: Array<{ toolName: string; input: any; result: any }>;
+    match: TaskMatch | null;
+  }> {
+    const client = this.getClient();
+
+    const prompt = `
+You are a helpful assistant that matches expense receipts to project tasks.
+
+Given this receipt:
+- Merchant: ${receipt.merchant}
+- Amount: $${receipt.total}
+- Date: ${receipt.date}
+- Category: ${receipt.category || 'unknown'}
+
+Your goal is to find the best matching task for this expense.
+
+You have access to tools for semantic search, date filtering, and budget matching.
+Use these tools intelligently - you may not need all of them.
+
+After analyzing, provide your final recommendation as JSON in this EXACT format:
+
+{
+  "taskId": "task-26",
+  "confidence": 85,
+  "reasons": [
+    "Semantic match: Receipt for AWS matches 'Setup AWS cloud infrastructure' task",
+    "Budget fit: $127.43 of $150.00 budget (85% utilization)",
+    "Date match: Receipt date falls within task work period"
+  ]
+}
+
+If no good match exists, use "taskId": null and explain why in reasons.`;
+
+    const toolCalls: Array<{ toolName: string; input: any; result: any }> = [];
+
+    try {
+      // Initial API call
+      let messages: Anthropic.MessageParam[] = [
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ];
+
+      let response = await client.messages.create({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4096,
+        tools: TOOLS,
+        messages,
+      });
+
+      // Tool calling loop
+      while (response.stop_reason === 'tool_use') {
+        // Extract tool uses from response
+        const toolUseBlocks = response.content.filter((block) => block.type === 'tool_use') as Anthropic.ToolUseBlock[];
+        // Execute each tool call
+        const toolResults: Anthropic.ToolResultBlockParam[] = [];
+
+        for (const toolUse of toolUseBlocks) {
+          let result: any;
+
+          switch (toolUse.name) {
+            case 'search_tasks_semantic':
+              result = await this.searchTasksSemanticSimple(toolUse.input as { query: string; limit?: number });
+              break;
+            case 'filter_by_date_range':
+              result = await this.filterByDateRangeSimple(toolUse.input as { taskIds: string[]; receiptDate: string });
+              break;
+            case 'rank_by_budget_match':
+              result = await this.rankByBudgetMatchSimple(toolUse.input as { taskIds: string[]; receiptAmount: number });
+              break;
+            default:
+              result = { error: `Unknown tool: ${toolUse.name}` };
+          }
+
+          toolCalls.push({
+            toolName: toolUse.name,
+            input: toolUse.input,
+            result,
+          });
+
+          toolResults.push({
+            type: 'tool_result',
+            tool_use_id: toolUse.id,
+            content: JSON.stringify(result),
+          });
+        }
+
+        // Continue conversation with tool results
+        messages.push({
+          role: 'assistant',
+          content: response.content,
+        });
+
+        messages.push({
+          role: 'user',
+          content: toolResults,
+        });
+
+        response = await client.messages.create({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 4096,
+          tools: TOOLS,
+          messages,
+        });
+      }
+
+      // Extract final reasoning
+      let reasoning = '';
+      const finalTextBlocks = response.content.filter((block) => block.type === 'text') as Anthropic.TextBlock[];
+      if (finalTextBlocks.length > 0) {
+        const finalReasoning = finalTextBlocks.map((block) => block.text).join('\n');
+        reasoning += finalReasoning;
+      }
+
+      // Parse the final response to extract the best match
+      const match = this.extractBestMatch(reasoning, toolCalls);
+
+      return {
+        reasoning,
+        toolCalls,
+        match,
+      };
+    } catch (error) {
+      console.error('[Matching] Error in simple matching:', error);
+      return {
+        reasoning: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        toolCalls,
+        match: null,
+      };
+    }
+  }
+
+  /**
+   * STREAMING VERSION - Match a receipt to a task using Claude with tool calling
+   * Streams progress via SSE for real-time updates
    * NOTE: SSE headers must already be set by the caller before calling this method
    */
   async matchReceiptToTask(receipt: ReceiptData, res: Response): Promise<void> {
@@ -262,6 +403,95 @@ If no good match exists, use "taskId": null and explain why in reasons.`;
       });
       res.end();
     }
+  }
+
+  /**
+   * SIMPLE - Search tasks using semantic similarity (no SSE)
+   */
+  private async searchTasksSemanticSimple(input: { query: string; limit?: number }): Promise<any> {
+    const vectorStore = getVectorStore();
+    if (!vectorStore) {
+      return { error: 'Vector store not initialized' };
+    }
+
+    const limit = input.limit || 10;
+    const results = await vectorStore.similaritySearch(input.query, limit);
+
+    return {
+      count: results.length,
+      tasks: results.map((doc) => ({
+        taskId: doc.metadata.taskId,
+        title: doc.metadata.title,
+        description: doc.metadata.description,
+        budget: doc.metadata.budget,
+        createdAt: doc.metadata.createdAt,
+        dueDate: doc.metadata.dueDate,
+        assignee: doc.metadata.assignee,
+      })),
+    };
+  }
+
+  /**
+   * SIMPLE - Filter tasks by date range (no SSE)
+   */
+  private async filterByDateRangeSimple(input: { taskIds: string[]; receiptDate: string }): Promise<any> {
+    const tasks = this.loadAllTasks();
+    const receiptDate = new Date(input.receiptDate);
+
+    const filtered = tasks.filter((task) => {
+      if (!input.taskIds.includes(task.id)) return false;
+      if (!task.budget) return false;
+
+      const createdAt = new Date(task.createdAt);
+      const dueDate = new Date(task.dueDate);
+
+      return receiptDate >= createdAt && receiptDate <= dueDate;
+    });
+
+    return {
+      count: filtered.length,
+      tasks: filtered.map((task) => ({
+        taskId: task.id,
+        title: task.title,
+        description: task.description,
+        budget: task.budget,
+        createdAt: task.createdAt,
+        dueDate: task.dueDate,
+        assignee: task.assignee,
+      })),
+    };
+  }
+
+  /**
+   * SIMPLE - Rank tasks by budget match (no SSE)
+   */
+  private async rankByBudgetMatchSimple(input: { taskIds: string[]; receiptAmount: number }): Promise<any> {
+    const tasks = this.loadAllTasks();
+
+    const ranked = tasks
+      .filter((task) => input.taskIds.includes(task.id) && task.budget !== undefined)
+      .filter((task) => input.receiptAmount <= task.budget!) // Only tasks where receipt fits budget
+      .map((task) => {
+        const utilization = (input.receiptAmount / task.budget!) * 100;
+        return {
+          taskId: task.id,
+          title: task.title,
+          description: task.description,
+          budget: task.budget,
+          receiptAmount: input.receiptAmount,
+          utilizationPercentage: parseFloat(utilization.toFixed(2)),
+          remaining: task.budget! - input.receiptAmount,
+          createdAt: task.createdAt,
+          dueDate: task.dueDate,
+          assignee: task.assignee,
+        };
+      })
+      .sort((a, b) => b.utilizationPercentage - a.utilizationPercentage); // Higher utilization = better match
+
+    return {
+      count: ranked.length,
+      tasks: ranked,
+    };
   }
 
   /**
@@ -482,7 +712,7 @@ If no good match exists, use "taskId": null and explain why in reasons.`;
   }
 }
 
-export const matchingService = new MatchingService();
+export const toolService = new ToolService();
 
 
 
@@ -497,3 +727,12 @@ function sendSSE(res: Response, event: string, data: any) {
     (res as any).flush();
   }
 }
+
+
+/*
+"Why use LLM here?":
+For learning purposes. I
+n production, I'd use deterministic logic here. 
+The LLM already helped us find and rank tasks. 
+The final selection is business logic - you want control over that."
+*/

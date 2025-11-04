@@ -28,60 +28,81 @@
 
 .app-nav {
   background: white;
-  padding: 1rem;
+  padding: 1.5rem;
   display: flex;
   justify-content: center;
-  gap: 1rem;
+  align-items: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   position: sticky;
   top: 0;
   z-index: 100;
 }
 
-.nav-link {
-  padding: 1rem 2rem;
-  border-radius: 8px;
-  text-decoration: none;
-  font-weight: 600;
+.toggle-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.toggle-label {
   font-size: 1.1rem;
-  transition: all 0.2s;
-  border: 2px solid transparent;
+  font-weight: 600;
+  color: #2c3e50;
 }
 
-.before-link {
-  background: #fde8e9;
-  color: #e74c3c;
+/* Toggle Switch Styles */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+  cursor: pointer;
 }
 
-.before-link:hover {
-  background: #e74c3c;
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
 }
 
-.before-link.active {
-  background: #e74c3c;
-  color: white;
-  border-color: #c0392b;
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 34px;
 }
 
-.after-link {
-  background: #e8f8f5;
-  color: #27ae60;
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
 }
 
-.after-link:hover {
-  background: #27ae60;
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(39, 174, 96, 0.3);
+.toggle-switch input:checked + .toggle-slider {
+  background-color: #27ae60;
 }
 
-.after-link.active {
-  background: #27ae60;
-  color: white;
-  border-color: #229954;
+.toggle-switch input:focus + .toggle-slider {
+  box-shadow: 0 0 1px #27ae60;
+}
+
+.toggle-switch input:checked + .toggle-slider:before {
+  transform: translateX(26px);
+}
+
+.toggle-switch:hover .toggle-slider {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .app-main {

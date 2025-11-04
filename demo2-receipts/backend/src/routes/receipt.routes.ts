@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import multer from 'multer';
 import { visionService } from '../services/vision.service';
 import { chainService } from '../services/chain.service';
-import { matchingService } from '../services/matching.service';
+import { toolService } from '../services/tool.service';
 import { join } from 'path';
 import { unlinkSync } from 'fs';
 
@@ -150,6 +150,78 @@ router.post('/parse/chain', upload.single('receipt'), async (req: Request, res: 
 });
 
 /**
+ * POST /api/match/simple
+ * TOOL CALLING (SIMPLE) - Receipt to Task Matching without streaming
+ * Returns the final result directly - perfect for demos to show simplicity!
+ */
+router.post('/match/simple', upload.single('receipt'), async (req: Request, res: Response) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        error: 'No receipt image provided'
+      });
+    }
+
+    const imagePath = req.file.path;
+
+    console.log('\n[Match Simple Route] Starting receipt-to-task matching (simple version)...');
+
+    // Step 1: Parse receipt using simple vision approach
+    console.log('[Match Simple Route] Step 1: Parsing receipt...');
+    const parseResult = await visionService.parseReceipt(imagePath);
+
+    // Clean up uploaded file
+    try {
+      unlinkSync(imagePath);
+    } catch (err) {
+      console.error('Error deleting uploaded file:', err);
+    }
+
+    // Check if parsing was successful
+    if (parseResult.status !== 'success') {
+      return res.json({
+        success: false,
+        approach: 'tool-calling-simple',
+        parseResult,
+        error: 'Receipt parsing failed - cannot match to task'
+      });
+    }
+
+    // Step 2: Match receipt to task using simple tool calling (no SSE)
+    console.log('[Match Simple Route] Step 2: Matching with tool calling...');
+    const matchResult = await toolService.matchReceiptToTaskSimple({
+      merchant: parseResult.receipt!.merchant,
+      date: parseResult.receipt!.date,
+      total: parseResult.receipt!.total,
+      category: parseResult.receipt!.category,
+      notes: parseResult.notes,
+    });
+
+    console.log('[Match Simple Route] ✓ Matching complete\n');
+
+    res.json({
+      success: true,
+      approach: 'tool-calling-simple',
+      receipt: parseResult.receipt,
+      matching: {
+        reasoning: matchResult.reasoning,
+        toolCalls: matchResult.toolCalls,
+        match: matchResult.match,
+      }
+    });
+
+  } catch (error) {
+    console.error('Error in match simple route:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to match receipt to task',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+/**
  * POST /api/match/stream
  * TOOL CALLING WITH SSE - Receipt to Task Matching with real-time progress
  * Streams progress updates as Claude thinks and calls tools
@@ -213,7 +285,7 @@ router.post('/match/stream', upload.single('receipt'), async (req: Request, res:
     console.log('[Match Stream Route] Step 2: Streaming matching process...');
 
     // Pass the parsed receipt to the matching service
-    await matchingService.matchReceiptToTask(
+    await toolService.matchReceiptToTask(
       {
         merchant: parseResult.receipt!.merchant,
         date: parseResult.receipt!.date,

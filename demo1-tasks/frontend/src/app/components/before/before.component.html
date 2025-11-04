@@ -97,7 +97,37 @@
       >
         Reset
       </button>
+      @if (queryObject) {
+        <button
+          class="json-toggle-button"
+          (click)="toggleJsonDisplay()"
+          title="{{ showJson ? 'Hide Query Object' : 'Show Query Object' }}"
+        >
+          📋
+        </button>
+      }
+
+      <div class="ai-toggle-wrapper">
+        <span class="ai-toggle-label">AI </span>
+        <label class="ai-toggle-switch">
+          <input
+            type="checkbox"
+            [checked]="false"
+            (change)="toggleAI()"
+          />
+          <span class="ai-toggle-slider"></span>
+        </label>
+      </div>
     </div>
+
+    @if (showJson && queryObject) {
+      <div class="json-display">
+        <div class="json-header">
+          <strong>🔍 Query Object:</strong>
+        </div>
+        <pre class="json-content">{{ getFormattedJson() }}</pre>
+      </div>
+    }
 
     @if (error) {
       <div class="error-message">
@@ -113,7 +143,7 @@
     ></app-task-list>
   </div>
 
-  @if (hasSearched) {
+  @if (false && hasSearched) {
     <div class="problems">
       <h3>❌ Problems with Traditional Approach</h3>
       <ul>

@@ -308,7 +308,10 @@
               </div>
 
               <div class="match-reasons">
-                <h5>Match Reasons:</h5>
+                 @if (result.matching.reasoning) {
+                  <p> {{ result.matching.reasoning }}</p>
+                }
+                <h5 style="margin-top: 1rem;">Match Reasons:</h5>
                 <ul>
                   @for (reason of result.matching.match.matchReasons; track reason) {
                     <li>{{ reason }}</li>

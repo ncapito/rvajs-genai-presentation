@@ -106,6 +106,10 @@
   padding: 1rem;
   border-radius: 4px;
   color: #c0392b;
+  margin-top: 1rem;
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.5;
 }
 
 .examples-section {
@@ -230,7 +234,7 @@
   background: #2c3e50;
   color: #2ecc71;
   font-family: 'Courier New', monospace;
-  font-size: 0.9rem;
+  font-size: 1.9rem;
   line-height: 1.5;
   overflow-x: auto;
   max-height: 500px;
@@ -335,4 +339,74 @@
   font-family: 'Courier New', monospace;
   color: #856404;
   font-weight: 600;
+}
+
+/* AI Toggle Styles */
+.ai-toggle-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: 1rem;
+  padding-left: 1rem;
+  border-left: 2px solid #e0e0e0;
+}
+
+.ai-toggle-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.ai-toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 28px;
+  cursor: pointer;
+}
+
+.ai-toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.ai-toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.3s;
+  border-radius: 28px;
+}
+
+.ai-toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+.ai-toggle-switch input:checked + .ai-toggle-slider {
+  background-color: #27ae60;
+}
+
+.ai-toggle-switch input:focus + .ai-toggle-slider {
+  box-shadow: 0 0 2px #27ae60;
+}
+
+.ai-toggle-switch input:checked + .ai-toggle-slider:before {
+  transform: translateX(22px);
+}
+
+.ai-toggle-switch:hover .ai-toggle-slider {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }

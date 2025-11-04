@@ -529,7 +529,7 @@ Respond with JSON:
 
 ## Implementation 3: Tool Calling with Streaming (ADVANCED)
 
-**File**: `backend/src/services/matching.service.ts`
+**File**: `backend/src/services/tool.service.ts`
 
 This shows **modern AI architecture** - let the LLM decide the workflow!
 

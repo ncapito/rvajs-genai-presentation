@@ -1,8 +1,8 @@
 import type { MemoryVectorStore } from 'langchain/vectorstores/memory';
-import { analyzeActivityChain } from './analyze-activity.chain.js';
-import { createRelevantCommentsChain } from './relevant-comments.chain.js';
-import { determineStyleChain } from './determine-style.chain.js';
-import { generateEmailChain } from './generate-email.chain.js';
+import { analyzeActivityChain } from '../analyze-activity.chain.js';
+import { createRelevantCommentsChain } from '../relevant-comments.chain.js';
+import { determineStyleChain } from '../determine-style.chain.js';
+import { generateEmailChain } from '../generate-email.chain.js';
 
 /**
  * COMPLETE VERSION - BACKUP FOR REFERENCE
