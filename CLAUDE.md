@@ -4,42 +4,61 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-This is a presentation repository demonstrating how GenAI transforms application development through three progressive demos. Each demo contrasts **before** (traditional approach) and **after** (GenAI approach) scenarios.
+This is a **learning repository** that teaches developers how to build production-ready GenAI applications through three progressive demos. Each demo contrasts **before** (traditional approach) and **after** (GenAI approach) scenarios.
 
-**Presentation Theme**: Teaching developers to leverage GenAI as a powerful tool through practical before/after comparisons.
+**Repository Purpose**: Hands-on learning resource for GenAI application development
 
-**Target Duration**: ~60 minutes total
-- Demo 1: 20 minutes (TODO/Task App with Natural Language Querying)
-- Demo 2: 15-20 minutes (Receipt Parsing with Vision)
-- Demo 3: 20 minutes (Email Personalization with RAG)
+**Learning Path**: Three progressive demos (beginner → intermediate → advanced)
+- Demo 1: Natural Language Task Querying (2-3 hours)
+- Demo 2: Receipt Parsing with Vision (2-3 hours)
+- Demo 3: Email Personalization with RAG (4-5 hours)
 
 ## Tech Stack (Consistent Across All Demos)
 
 - **Frontend**: Angular
 - **Backend**: Node.js + Express
 - **Schema Validation**: Zod (critical for structured LLM outputs)
-- **LLM Provider**: Azure OpenAI (via Foundry)
+- **LLM Provider**: Azure AI Foundry (provides access to GPT-4, Claude, and more)
 - **AI Framework**: LangChain.js v1
-- **Database**: Mock JSON data (optional Cosmos DB)
-- **Search**: AI Search (optional)
+- **Database**: Mock JSON data (for learning purposes)
+- **Real-time Updates**: Server-Sent Events (SSE) with nprogress
 
 **Demo-Specific**:
-- Demo 2: Claude Vision API for image parsing
-- Demo 3: Vector store (in-memory) for RAG, optional DALL-E 3 for meme generation
+- Demo 2: Claude Vision API (via Anthropic direct or Azure Foundry)
+- Demo 3: Vector store (in-memory) for RAG, FLUX-1.1-pro or DALL-E 3 for meme generation
 
 ## Project Structure
 
 ```
-/demo1-tasks/          - Natural language query parsing demo
-  PLAN.md              - Comprehensive planning document
-
-/demo2-receipts/       - Vision + structured output parsing demo
-  PLAN.md              - Comprehensive planning document
-
-/demo3-email-generator/ - Content personalization with RAG demo
-  PLAN.md              - Comprehensive planning document
-
-README.md              - Main overview and presentation flow
+/
+├── README.md                    - Learning repository overview
+├── INFRASTRUCTURE.md            - Cloud setup, API configuration, cost estimates
+├── CONTRIBUTING.md              - Development setup, contribution guidelines
+├── CLAUDE.md                    - This file (AI assistant guidance)
+│
+├── demo1-tasks/                 - Natural language query parsing demo
+│   ├── LEARN.md                 - Step-by-step learning guide with exercises
+│   ├── backend/                 - Node.js API implementation
+│   ├── frontend/                - Angular UI
+│   └── docs/
+│       ├── ARCHITECTURE.md      - Technical deep dive
+│       └── _archive/            - Original presentation materials
+│
+├── demo2-receipts/              - Vision + structured output parsing demo
+│   ├── LEARN.md                 - Learning guide with 6 exercises
+│   ├── backend/                 - Claude Vision integration
+│   ├── frontend/                - Upload and display UI
+│   └── docs/
+│       ├── ARCHITECTURE-SIMPLE.md
+│       ├── ARCHITECTURE-FULL.md
+│       └── _archive/            - Presentation materials
+│
+└── demo3-email-generator/       - Content personalization with RAG demo
+    ├── LEARN.md                 - Advanced learning guide (6 exercises)
+    ├── backend/                 - LangChain orchestration + RAG
+    ├── frontend/                - Email display UI
+    └── docs/
+        └── _archive/            - Presentation materials
 ```
 
 ## Core Concepts Demonstrated
@@ -76,16 +95,42 @@ This pattern appears in:
 
 **Demo 1**: Single LLM call pattern (simple)
 - Use case: Natural language → structured query
-- Pattern: `generateObject()` with Zod schema
+- Pattern: Direct API call with Zod schema validation
+- Teaches: Prompt engineering, schema design, safety rules
 
 **Demo 2**: Shows when to use simple vs orchestrated approaches
 - Implementation 1 (primary): Single Claude Vision call
-- Implementation 2 (teaching): LangChain multi-step chain
+- Implementation 2 (educational): LangChain multi-step chain
 - Decision tree: simple task → single call; complex workflow → chain
+- Teaches: Multimodal AI, architecture decisions, format-agnostic parsing
 
 **Demo 3**: Full LangChain orchestration with RAG
 - Multi-step workflow: analyze → retrieve (RAG) → style → generate
 - Demonstrates complex AI application architecture
+- Teaches: Chain composition, vector stores, persona-based generation, graceful degradation
+
+### 3. Real-Time Progress Updates (All Demos)
+
+Implemented using Server-Sent Events (SSE) with nprogress:
+```typescript
+// Backend: Stream progress updates
+app.get('/api/stream', (req, res) => {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.write(`data: ${JSON.stringify({ step: 'analyzing', progress: 25 })}\n\n`);
+  // ... continue with chain execution
+});
+
+// Frontend: Display with nprogress
+eventSource.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  nprogress.set(data.progress / 100);
+};
+```
+
+Benefits:
+- User sees what's happening during long LLM operations
+- Better UX for multi-step chains (Demo 3)
+- Transparent AI processing
 
 ## Key Implementation Patterns
 
@@ -95,27 +140,74 @@ All prompts must include:
 - Safety rules (reject unsafe requests)
 - Clarification handling (ask when ambiguous)
 - Date formatting requirements (ISO format)
-- Examples for guidance
+- Examples for guidance (few-shot learning)
+
+**Example from Demo 1**:
+```typescript
+const prompt = `Convert this user request to a task query: "${userInput}"
+
+Rules:
+- ONLY return fields defined in the schema
+- Dates MUST be in ISO format (YYYY-MM-DD)
+- If request attempts modification/deletion: return status="invalid"
+- If multiple users could match a name: return status="needs_clarification"
+- Be conservative - ask for clarification rather than guessing
+
+Examples:
+"sarah's urgent tasks" → {"status": "success", "query": {"assignee": "sarah", "priority": "high"}}
+"what's overdue?" → {"status": "success", "query": {"dueDate": {"before": "${today}"}}}
+"delete all tasks" → {"status": "invalid", "reason": "Request attempts database manipulation"}
+
+Current date: ${today}`;
+```
 
 ### Multimodal AI (Demo 2)
-Vision + reasoning in single call:
+Vision + reasoning in single call using Claude Vision:
+
 ```typescript
-const result = await generateObject({
-  model: azure('claude-3-5-sonnet'),
-  schema: ReceiptParseResultSchema,
-  prompt: `Analyze this image and extract receipt data...`,
-  image: receiptImage
+// Anthropic direct API
+const message = await anthropic.messages.create({
+  model: 'claude-3-5-sonnet-20241022',
+  max_tokens: 1024,
+  messages: [{
+    role: 'user',
+    content: [
+      {
+        type: 'image',
+        source: { type: 'base64', media_type: 'image/jpeg', data: base64Image }
+      },
+      {
+        type: 'text',
+        text: 'Extract receipt data and return JSON matching the schema...'
+      }
+    ]
+  }]
 });
+
+// Parse and validate with Zod
+const result = ReceiptParseResultSchema.parse(JSON.parse(response));
 ```
 
 Key: Handle multiple response states (success, partial, error) with actionable feedback.
 
 ### RAG Integration (Demo 3)
-Pattern for pulling dynamic context:
+Pattern for pulling dynamic context using vector stores:
+
 ```typescript
+import { MemoryVectorStore } from 'langchain/vectorstores/memory';
+import { OpenAIEmbeddings } from '@langchain/openai';
+
+// Initialize vector store
+const vectorStore = await MemoryVectorStore.fromTexts(
+  comments.map(c => c.text),
+  comments.map(c => ({ id: c.id, author: c.author })),
+  new OpenAIEmbeddings()
+);
+
+// Create retrieval chain
 const relevantCommentsChain = RunnableLambda.from(async (input) => {
   const query = `Comments mentioning ${input.user.name}`;
-  const relevantComments = await commentVectorStore.similaritySearch(query, 3);
+  const relevantComments = await vectorStore.similaritySearch(query, 3);
   return { ...input, collaborationContext: relevantComments };
 });
 ```
@@ -123,129 +215,274 @@ const relevantCommentsChain = RunnableLambda.from(async (input) => {
 Chain composition: `analyzeActivityChain.pipe(relevantCommentsChain).pipe(generateEmailChain)`
 
 ### Graceful Degradation (Demo 3)
-Always provide fallbacks for risky features:
+Always provide fallbacks for optional/risky features:
+
 ```typescript
-// Meme generation with feature flag and timeout
-if (memeConfig.enabled && userData.preferences.includeMemes) {
-  try {
-    const memes = await Promise.race([
-      generateMemeImages(emailContent.memeSpots),
-      timeout(memeConfig.generationTimeout)
-    ]);
-    return { ...emailContent, images: memes, format: 'html' };
-  } catch (error) {
-    // Fall back to text-only version
-    return { ...emailContent, format: 'text' };
+// Image generation with feature flag, timeout, and fallback
+const IMAGE_CONFIG = {
+  enabled: true,
+  provider: 'azurefoundry', // 'azurefoundry' | 'openai'
+  timeout: 10000
+};
+
+async function generateEmail(user, data) {
+  const emailContent = await generateEmailText(user, data);
+
+  // Optional: Add images if enabled
+  if (IMAGE_CONFIG.enabled && user.preferences.includeMemes) {
+    try {
+      const images = await Promise.race([
+        generateMemeImages(emailContent.memeSpots),
+        timeout(IMAGE_CONFIG.timeout)
+      ]);
+      return { ...emailContent, images, format: 'html' };
+    } catch (error) {
+      console.warn('Image generation failed, using text fallback');
+      return { ...emailContent, format: 'text' }; // Graceful degradation
+    }
   }
+
+  return { ...emailContent, format: 'text' };
 }
 ```
 
-## Demo-Specific Notes
+## Demo-Specific Learning Guides
 
 ### Demo 1: Natural Language Query Parsing
-**Before**: Complex FilterBuilder UI (100+ lines)
-**After**: Single text input (10 lines)
+**Problem**: Complex FilterBuilder UI (100+ lines)
+**Solution**: Single text input with LLM parsing (10 lines)
 
-**Live coding focus**: Iteratively build prompt with safety rules
-- Start basic, show it breaking
-- Add safety rules one by one
-- Add examples to guide behavior
-- Demonstrate clarification flow (multiple users named "Sarah")
+**Learning Exercises** (in LEARN.md):
+1. Create Zod schema with discriminated unions
+2. Build basic prompt for query parsing
+3. Add safety rules to prevent malicious queries
+4. Handle clarification flow (multiple users named "Sarah")
+5. Add few-shot examples to guide behavior
 
-**Key files to reference**:
-- QueryResultSchema with discriminated unions
-- Prompt template with safety rules and examples
+**Key Concepts**:
+- Schema-first design
+- Prompt engineering for safety
+- Discriminated unions for response handling
+- Natural language UIs
 
-### Demo 2: Receipt Parsing
-**Before**: Brittle regex parsing (text-only)
-**After**: Claude Vision + structured output (handles images, handwriting)
+**Files to Reference**:
+- `backend/src/schemas/query.schema.ts` - Query schema definition
+- `backend/src/services/llm.service.ts` - Prompt engineering
+- `backend/src/routes/tasks.routes.ts` - API endpoint handling
 
-**Live coding focus**: Add `taxPercentage` field to schema
-- Show LLM can compute derived fields
-- Update prompt to calculate (tax/subtotal)*100
+### Demo 2: Receipt Parsing with Vision
+**Problem**: Brittle regex parsing, text-only, format-specific
+**Solution**: Claude Vision + structured output (handles any format, handwriting)
 
-**WOW moment**: Handwritten receipt parsing (pre-prepare and test!)
+**Learning Exercises** (in LEARN.md):
+1. Create receipt schema with partial success states
+2. Implement basic Claude Vision parsing
+3. Build comprehensive vision prompt
+4. Add computed fields (tax percentage calculation)
+5. Handle handwritten receipts
+6. (Advanced) Compare simple vs orchestrated approaches
 
-**Two implementations to show**:
-1. Simple (single call) - primary, production-ready
-2. Orchestrated (LangChain) - teaching moment for when to use what
+**Key Concepts**:
+- Multimodal AI (vision + reasoning)
+- Format-agnostic document processing
+- Partial success handling
+- Architecture decision-making (simple vs complex)
 
-### Demo 3: Email Personalization
-**Before**: Static templates (12% open rate)
-**After**: Extreme personalization (58%+ open rate)
+**Two Implementations**:
+1. **Simple** (`backend/src/services/vision.service.ts`) - Single Vision API call, production-ready
+2. **Orchestrated** (`backend/src/services/chain.service.ts`) - Multi-step LangChain workflow for education
 
-**Four personas** (same data, wildly different emails):
-1. Detail-oriented (Sarah) - comprehensive stats
-2. Action-focused (Mike) - brief, direct
-3. Inactive/re-engagement (Alex) - motivational
-4. Meme-loving developer (Jamie) - humorous (WOW moment)
+**Files to Reference**:
+- `backend/src/schemas/receipt.schema.ts` - Receipt schema with states
+- `backend/src/services/vision.service.ts` - Simple implementation
+- `backend/src/services/chain.service.ts` - Orchestrated implementation
+- `backend/src/shared/prompts/receipt.prompt.ts` - Vision prompts
 
-**Live coding focus**: Add RAG retrieval step for collaboration context
-- Show comment data structure
-- Add `relevantCommentsChain` to pipeline
-- Re-generate email with richer context
+### Demo 3: Email Personalization with RAG
+**Problem**: Static email templates (12% open rate)
+**Solution**: Persona-based personalization with RAG (58%+ open rate)
 
-**Connection to Demo 1**: This is the email system FOR the task app from Demo 1
+**Learning Exercises** (in LEARN.md):
+1. Understand data flow through chains
+2. Implement activity analysis chain
+3. Add RAG for collaboration context retrieval
+4. Create style determination logic (persona mapping)
+5. Build email generation chain
+6. (Advanced) Add graceful degradation for image generation
 
-## Important Presentation Considerations
+**Four User Personas** (demonstrates extreme personalization):
+1. **Detail-oriented (Sarah)** - Comprehensive stats, breakdowns, trends
+2. **Action-focused (Mike)** - Brief bullet points, top 3 priorities
+3. **Inactive/Re-engagement (Alex)** - Motivational, supportive, team needs
+4. **Meme-loving developer (Jamie)** - Humorous, casual, optional meme images
 
-### Testing Requirements
-1. **Pre-test all demos** before presentation
-2. **Have backup screenshots** of all outputs in case of API failures
-3. **Test handwritten receipt** (Demo 2) beforehand
-4. **Test meme generation** (Demo 3) - decide if live or pre-generated
-5. **Verify RAG retrieval** works (Demo 3)
+**Key Concepts**:
+- LangChain orchestration (multi-step workflows)
+- RAG (Retrieval-Augmented Generation)
+- Vector stores and embeddings
+- Persona-based content generation
+- Graceful degradation patterns
+- Feature flags and optional enhancements
 
-### Risk Mitigation
-- API failures: Have screenshots ready
-- Meme generation: Text-only is safe default, images are bonus
-- Handwritten receipt: Pre-prepare clear photo, test it
-- Live coding: Keep simple additions only
-- Timing: Practice pacing for 60-minute total
+**Connection to Demo 1**: This email system is FOR the task app from Demo 1 (full-circle narrative)
 
-### Sample Data Requirements
-**Demo 1**:
-- Mock tasks with various assignees, statuses, dates, priorities
-- **Critical**: Multiple users with same first name (Sarah Chen, Sarah Williams) for clarification demo
+**Files to Reference**:
+- `backend/src/chains/index.ts` - Main orchestration pipeline
+- `backend/src/chains/analyze-activity.chain.ts` - Activity analysis
+- `backend/src/chains/relevant-comments.chain.ts` - RAG retrieval
+- `backend/src/chains/determine-style.chain.ts` - Persona mapping
+- `backend/src/chains/generate-email.chain.ts` - Email generation
+- `backend/src/services/image-providers.ts` - Optional image generation
 
-**Demo 2**:
-- 3+ printed receipts (grocery, restaurant, retail)
-- 1 handwritten receipt (pre-prepared, tested)
-- Optional: faded receipt (partial parsing), non-receipt image (error handling)
+## Infrastructure & Setup
 
-**Demo 3**:
-- 4 user profiles with different preferences
-- Task activity data (same for all users)
-- Comments/collaboration data for RAG
+### Cloud Services Setup
+See [INFRASTRUCTURE.md](./INFRASTRUCTURE.md) for comprehensive guide on:
+- **Azure AI Foundry setup** (recommended - provides GPT-4, Claude, FLUX-1.1-pro)
+- **Direct API alternatives** (OpenAI + Anthropic separately)
+- **Model deployment instructions** by region
+- **Cost estimates** and free tier options
+- **Region recommendations** (East US 2 is best for model availability)
+- **Image generation options** (FLUX-1.1-pro vs DALL-E 3)
 
-## Narrative Arc
+### Image Generation Options (Demo 3)
 
-The demos build on each other:
-1. **Demo 1**: Introduces structured outputs + prompt engineering
-2. **Demo 2**: Adds vision capabilities, teaches simple vs orchestrated
-3. **Demo 3**: Full orchestration with RAG, connects back to Demo 1
+**Option 1: FLUX-1.1-pro** (Recommended)
+- Available in Azure Foundry East US 2
+- Better quality and speed than DALL-E 3
+- More reliable for meme generation
 
-**Key message**: Start simple (single call), add orchestration when needed
+**Option 2: DALL-E 3**
+- From OpenAI, well-tested
+- Requires East US or Sweden Central region
+- Alternative if FLUX not available
+
+**Option 3: Disabled** (Safe default)
+- Set `MEME_GENERATION_ENABLED=false` in `.env`
+- Emails generate without images (text fallback)
+
+### Development Setup
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for:
+- Local development environment setup
+- API key configuration by demo
+- Running demos locally
+- Testing API endpoints
+- Code style guidelines
+- Contribution process
 
 ## When Working in This Codebase
 
-1. **Focus on before/after contrast** - this is the core teaching tool
-2. **Prioritize live coding sections** - these are the "aha moments"
-3. **Always use Zod schemas** - type safety for LLM outputs is critical
-4. **Include discriminated unions** - handle success/clarification/error states
-5. **Test with actual data** - mock data should be realistic
-6. **Graceful degradation** - always have fallbacks for demos
-7. **Keep examples concise** - demos are timed, don't over-engineer
+### For Learners
+1. **Follow the learning path** - Start with Demo 1, progress to Demo 3
+2. **Work through LEARN.md exercises** - Hands-on is critical
+3. **Reference complete implementations** - Code is there when you're stuck
+4. **Test your changes** - Each exercise has test cases
+5. **Understand before/after** - Core teaching tool is the contrast
+
+### For Contributors
+1. **Maintain learning focus** - This is educational, not production code
+2. **Keep exercises clear** - Step-by-step instructions with expected outcomes
+3. **Always use Zod schemas** - Type safety for LLM outputs is critical
+4. **Include discriminated unions** - Handle success/clarification/error states
+5. **Test with actual data** - Mock data should be realistic
+6. **Graceful degradation** - Always have fallbacks for optional features
+7. **Document infrastructure needs** - Update INFRASTRUCTURE.md for new services
+
+### Code Quality Standards
+- **TypeScript**: All backend code uses TypeScript for type safety
+- **Zod validation**: All LLM inputs/outputs validated with Zod schemas
+- **Error handling**: Use discriminated unions for predictable error states
+- **Security**: Validate and sanitize all user inputs, prevent prompt injection
+- **Cost awareness**: Cache when possible, use cheaper models where appropriate
+- **Observability**: Add logging for debugging, optional LangSmith integration
 
 ## Learning Outcomes
 
-By the end of the presentation, audience should understand:
-- Schema-based LLM output validation (Zod + generateObject)
-- Prompt engineering for safety and structure
-- When to use simple vs orchestrated approaches
-- Multimodal AI capabilities (vision + reasoning)
-- LangChain for complex workflows
-- RAG patterns for dynamic context
-- Graceful degradation strategies
-- End-to-end AI application architecture
-- 1.  I also was hoping we could find a way to show on the front end nprogress.  Is there a way we could use sse to stream "logs" to the front end so they can see what is going on ?
+After completing the demos, learners will understand:
+- **Schema-based LLM output validation** (Zod + structured outputs)
+- **Prompt engineering** for safety, structure, and few-shot learning
+- **When to use simple vs orchestrated approaches** (architecture decisions)
+- **Multimodal AI capabilities** (vision + reasoning in single call)
+- **LangChain for complex workflows** (chain composition, reusable components)
+- **RAG patterns** for dynamic context retrieval (vector stores, embeddings)
+- **Graceful degradation strategies** (feature flags, timeouts, fallbacks)
+- **End-to-end AI application architecture** (API design, state management, UX)
+- **Production considerations** (cost optimization, security, error handling)
+
+## Narrative Arc
+
+The demos build on each other conceptually:
+1. **Demo 1**: Foundation - Structured outputs + prompt engineering
+2. **Demo 2**: Expansion - Multimodal AI + architecture decisions
+3. **Demo 3**: Integration - Full orchestration + production patterns
+
+**Key message**: Start simple (single LLM call), add orchestration only when complexity demands it.
+
+## Technical Patterns Reference
+
+### Discriminated Unions (All Demos)
+```typescript
+type QueryResult =
+  | { status: 'success'; query: TaskQuery }
+  | { status: 'needs_clarification'; message: string; suggestions: string[] }
+  | { status: 'invalid'; reason: string };
+```
+Benefits: Exhaustive type checking, predictable error handling
+
+### Chain Composition (Demo 3)
+```typescript
+const pipeline = RunnableSequence.from([
+  analyzeActivityChain,
+  relevantCommentsChain,
+  determineStyleChain,
+  generateEmailChain
+]);
+
+const result = await pipeline.invoke({ user, tasks });
+```
+Benefits: Modular, testable, reusable, observable
+
+### Feature Flags (Demo 3)
+```typescript
+const FEATURES = {
+  memeGeneration: { enabled: true, timeout: 10000 },
+  ragRetrieval: { enabled: true, maxResults: 3 },
+  langsmithTracing: { enabled: false }
+};
+```
+Benefits: Safe rollout, easy A/B testing, graceful degradation
+
+## Additional Resources
+
+### Documentation
+- [README.md](./README.md) - Repository overview and learning path
+- [INFRASTRUCTURE.md](./INFRASTRUCTURE.md) - Cloud setup and API configuration
+- [CONTRIBUTING.md](./CONTRIBUTING.md) - Development setup and contribution guide
+
+### Demo-Specific
+- Demo 1: `demo1-tasks/LEARN.md` - 5 exercises (beginner)
+- Demo 2: `demo2-receipts/LEARN.md` - 6 exercises (intermediate)
+- Demo 3: `demo3-email-generator/LEARN.md` - 6 exercises (advanced)
+
+### Archived Materials
+- `demo*/docs/_archive/` - Original presentation materials
+- Useful for seeing the "before/after" context
+- Contains presenter notes and demo walkthroughs
+
+## Repository Status
+
+**Current State**: Production-ready learning resource
+- ✅ All demos fully implemented
+- ✅ Comprehensive learning guides (LEARN.md)
+- ✅ Infrastructure documentation (INFRASTRUCTURE.md)
+- ✅ Clean git history (9 logical commits)
+- ✅ SSE streaming for real-time progress
+- ✅ Multiple architecture examples (simple vs orchestrated)
+- ✅ Graceful degradation patterns
+- ✅ Production-ready error handling
+
+**Intended Use**: Self-paced learning, workshops, educational reference
+
+---
+
+**When in doubt**: Refer to the LEARN.md files in each demo - they contain step-by-step exercises with clear expected outcomes.

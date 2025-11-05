@@ -15,17 +15,21 @@ Before you begin, ensure you have:
 
 ### API Access Requirements
 
-You'll need API keys for:
+You'll need API keys for the AI services. See [INFRASTRUCTURE.md](./INFRASTRUCTURE.md) for comprehensive setup instructions.
 
-#### Azure OpenAI (Demos 1 & 3)
-- Azure subscription with OpenAI service enabled
-- API key, endpoint, and deployment name
-- [Get started with Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/quickstart)
+**Quick Links:**
+- **Azure AI Foundry** (recommended): [Setup Guide](./INFRASTRUCTURE.md#-azure-ai-foundry-setup)
+- **Direct APIs**: [Alternative Setup](./INFRASTRUCTURE.md#-direct-api-setup-without-azure)
+- **Cost Estimates**: [Pricing Guide](./INFRASTRUCTURE.md#-cost-estimates)
 
-#### Anthropic Claude (Demo 2)
-- Anthropic API account
-- API key with Claude 3.5 Sonnet access
-- [Get API access](https://console.anthropic.com/)
+#### Azure AI Foundry (Recommended for Demos 1 & 3)
+- Provides access to GPT-4, embeddings, FLUX-1.1-pro, and more
+- Single platform for multiple AI models
+- [Complete setup guide](./INFRASTRUCTURE.md#-azure-ai-foundry-setup)
+
+#### Anthropic Claude (Required for Demo 2)
+- Direct API for Claude 3.5 Sonnet with vision
+- [Get API key](https://console.anthropic.com/)
 
 ### Repository Setup
 
@@ -51,6 +55,8 @@ You'll need API keys for:
    ```
 
 ## 🔑 API Key Configuration
+
+> 💡 **For detailed infrastructure setup, model deployments, and alternatives, see [INFRASTRUCTURE.md](./INFRASTRUCTURE.md)**
 
 ### Demo 1: Natural Language Querying
 

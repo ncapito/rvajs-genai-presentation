@@ -70,8 +70,9 @@ This repository teaches you how to:
 
 - **Node.js** 18+ installed
 - **API Access** to either:
-  - Azure OpenAI (recommended for demos 1 & 3)
-  - Anthropic Claude (required for demo 2)
+  - Azure AI Foundry (recommended - provides access to GPT-4, Claude, and more)
+  - Direct APIs: OpenAI + Anthropic
+  - See [INFRASTRUCTURE.md](./INFRASTRUCTURE.md) for detailed setup guide
 - **Basic knowledge** of:
   - TypeScript/JavaScript
   - Async/await patterns
@@ -90,7 +91,11 @@ This repository teaches you how to:
    - [Demo 2](./demo2-receipts/LEARN.md) - Learn vision AI
    - [Demo 3](./demo3-email-generator/LEARN.md) - Master orchestration
 
-3. **Set up API keys** (see [CONTRIBUTING.md](./CONTRIBUTING.md) for details)
+3. **Set up cloud infrastructure** - See [INFRASTRUCTURE.md](./INFRASTRUCTURE.md) for:
+   - Azure AI Foundry setup (recommended)
+   - Direct API alternatives (OpenAI + Anthropic)
+   - Model deployment instructions
+   - Cost estimates and free tier options
 
 4. **Start building!** Each demo has step-by-step exercises
 
@@ -247,9 +252,13 @@ Each demo contrasts **traditional approaches** with **GenAI solutions**:
 
 ## 📚 Additional Resources
 
+### Setup Guides
+- [INFRASTRUCTURE.md](./INFRASTRUCTURE.md) - Cloud setup, API configuration, cost estimates
+- [CONTRIBUTING.md](./CONTRIBUTING.md) - Development setup, contribution guidelines
+
 ### Official Documentation
 - [LangChain.js Docs](https://js.langchain.com/docs)
-- [Azure OpenAI Service](https://learn.microsoft.com/en-us/azure/ai-services/openai/)
+- [Azure AI Foundry](https://learn.microsoft.com/en-us/azure/ai-services/openai/)
 - [Anthropic Claude API](https://docs.anthropic.com/)
 - [Zod Documentation](https://zod.dev)
 
