@@ -82,8 +82,8 @@ This repository teaches you how to:
 
 1. **Clone the repository**:
    ```bash
-   git clone <your-repo-url>
-   cd genai_presentation
+   git clone https://github.com/ncapito/rvajs-genai-presentation.git
+   cd rvajs-genai-presentation
    ```
 
 2. **Choose a demo** and follow its LEARN.md:
@@ -150,39 +150,45 @@ Demo 3: Full Orchestration
 
 - **[LangChain.js](https://js.langchain.com/)** - AI application framework
 - **[Zod](https://zod.dev)** - Schema validation for type safety
-- **[Azure OpenAI](https://azure.microsoft.com/en-us/products/ai-services/openai-service)** - GPT-4 and DALL-E access
-- **[Anthropic Claude](https://www.anthropic.com/)** - Vision AI capabilities
+- **[Azure AI Foundry](https://azure.microsoft.com/en-us/products/ai-services/openai-service)** - Access to GPT-4, Claude, FLUX-1.1-pro, and more
+- **[Anthropic Claude](https://www.anthropic.com/)** - Vision AI capabilities (direct API)
 - **Angular** - Frontend framework
-- **Node.js + Express** - Backend API
+- **Node.js + Express** - Backend API with SSE for real-time progress
 - **TypeScript** - Type-safe development
 
 ## 📂 Repository Structure
 
 ```
-genai_presentation/
+rvajs-genai-presentation/
 ├── README.md                    # This file
-├── CONTRIBUTING.md              # Setup and contribution guide
+├── INFRASTRUCTURE.md            # Cloud setup, API configuration
+├── CONTRIBUTING.md              # Development setup guide
+├── CLAUDE.md                    # AI assistant guidance
 │
 ├── demo1-tasks/                 # Natural language querying
 │   ├── LEARN.md                 # Learning guide with exercises
 │   ├── backend/                 # Node.js API
+│   │   └── .env.example         # Environment template
 │   ├── frontend/                # Angular UI
-│   └── docs/                    # Architecture docs
+│   └── docs/
 │       ├── ARCHITECTURE.md      # Technical details
 │       └── _archive/            # Presentation materials
 │
 ├── demo2-receipts/              # Receipt parsing with vision
 │   ├── LEARN.md                 # Learning guide
 │   ├── backend/                 # Vision AI integration
+│   │   └── .env.example         # Environment template
 │   ├── frontend/                # Upload UI
-│   └── docs/                    # Architecture docs
+│   └── docs/
+│       ├── ARCHITECTURE-*.md    # Technical details
 │       └── _archive/            # Presentation materials
 │
 └── demo3-email-generator/       # Email personalization
     ├── LEARN.md                 # Learning guide
     ├── backend/                 # LangChain orchestration
+    │   └── .env.example         # Environment template
     ├── frontend/                # Email display
-    └── docs/                    # Architecture docs
+    └── docs/
         └── _archive/            # Presentation materials
 ```
 
@@ -298,9 +304,10 @@ Built to teach practical GenAI application development through hands-on examples
 
 **Key Technologies**:
 - LangChain.js for orchestration
-- Azure OpenAI for GPT-4
+- Azure AI Foundry for GPT-4, embeddings, and image generation
 - Anthropic Claude for vision AI
 - Zod for type-safe schemas
+- SSE for real-time progress updates
 
 ---
 
