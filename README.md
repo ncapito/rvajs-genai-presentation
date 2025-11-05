@@ -2,6 +2,8 @@
 
 A hands-on learning resource demonstrating how to build production-ready GenAI applications through three progressive demos.
 
+> 📊 **Based on the RVA.js Presentation**: [View Slides](https://docs.google.com/presentation/d/1azOYBzRr1a-uM3meoA1oPiit4X0D93l2kpI9cHr5zP0/)
+
 ## 🎯 What You'll Learn
 
 This repository teaches you how to:
@@ -171,8 +173,7 @@ rvajs-genai-presentation/
 │   │   └── .env.example         # Environment template
 │   ├── frontend/                # Angular UI
 │   └── docs/
-│       ├── ARCHITECTURE.md      # Technical details
-│       └── _archive/            # Presentation materials
+│       └── ARCHITECTURE.md      # Technical details
 │
 ├── demo2-receipts/              # Receipt parsing with vision
 │   ├── LEARN.md                 # Learning guide
@@ -180,16 +181,13 @@ rvajs-genai-presentation/
 │   │   └── .env.example         # Environment template
 │   ├── frontend/                # Upload UI
 │   └── docs/
-│       ├── ARCHITECTURE-*.md    # Technical details
-│       └── _archive/            # Presentation materials
+│       └── ARCHITECTURE-*.md    # Technical details
 │
 └── demo3-email-generator/       # Email personalization
     ├── LEARN.md                 # Learning guide
     ├── backend/                 # LangChain orchestration
     │   └── .env.example         # Environment template
-    ├── frontend/                # Email display
-    └── docs/
-        └── _archive/            # Presentation materials
+    └── frontend/                # Email display
 ```
 
 ## 🎯 Learning Objectives
@@ -258,7 +256,8 @@ Each demo contrasts **traditional approaches** with **GenAI solutions**:
 
 ## 📚 Additional Resources
 
-### Setup Guides
+### This Repository
+- 📊 [Presentation Slides](https://docs.google.com/presentation/d/1azOYBzRr1a-uM3meoA1oPiit4X0D93l2kpI9cHr5zP0/) - Original RVA.js presentation
 - [INFRASTRUCTURE.md](./INFRASTRUCTURE.md) - Cloud setup, API configuration, cost estimates
 - [CONTRIBUTING.md](./CONTRIBUTING.md) - Development setup, contribution guidelines
 

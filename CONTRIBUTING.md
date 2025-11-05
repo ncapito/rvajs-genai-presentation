@@ -425,7 +425,7 @@ Each demo has detailed architecture docs:
 
 Complete working code is available in each demo:
 - Review `backend/src/` for reference implementations
-- Check `docs/_archive/` for original presentation materials
+- Check `LEARN.md` files for step-by-step exercises
 
 ## 🔒 Security
 

@@ -29,7 +29,7 @@ class LLMService {
           },
           {
             role: "user",
-            content: this.buildPrompt(userInput, today), //TODOLIVE Demo1: Fix prompt
+            content: this.buildPrompt(userInput, today),
           },
         ],
         response_format: { type: "json_object" },
@@ -64,7 +64,7 @@ class LLMService {
         }
       }
 
-      //TODOLIVE DEMO 1: Add zod validation here...
+      // EXERCISE: Add Zod validation here (see LEARN.md Exercise 1)
       return parsed;
     } catch (error) {
       console.error("Error parsing natural language query:", error);
@@ -76,8 +76,10 @@ class LLMService {
   }
 
   /**
-   * TODOLIVE DEMO 1: Fix issues with status and jailbreak....
-   *
+   * EXERCISE: Improve this prompt to handle edge cases (see LEARN.md Exercise 2-4)
+   * - Add safety rules to prevent malicious queries
+   * - Handle clarification requests better
+   * - Add few-shot examples for better accuracy
    */
   private buildPrompt(userInput: string, today: string): string {
     //return realDemo1Prompt(userInput, today);

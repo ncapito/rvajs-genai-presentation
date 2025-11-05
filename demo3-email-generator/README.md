@@ -181,48 +181,6 @@ Frontend runs on `http://localhost:4203`
 4. Try "Side-by-Side Comparison" to generate all 4 at once
 5. Notice how the same data produces wildly different emails!
 
-## Demo Flow (20 minutes)
-
-### Part 1: The "Before" - Static Templates (3 min)
-- Show generic template code
-- Display boring, lifeless email
-- Talk about low engagement rates
-
-### Part 2: Introduce User Profiles (2 min)
-- Show 4 personas side-by-side
-- Highlight the SAME task data for all
-- "Different people need different things"
-
-### Part 3: Generate Personalized Emails (8 min)
-- Generate Sarah's email (detail-oriented)
-- Generate Mike's email (action-focused)
-- Generate Alex's email (re-engagement)
-- **Show side-by-side**: Same data, wildly different emails!
-
-### Part 4: Live Code - RAG for Collaboration Context (5 min)
-
-**Before**: Emails mention collaborators generically
-```typescript
-"Sarah commented on your task"
-```
-
-**After**: Pull actual comment content via RAG
-```typescript
-"Sarah commented: 'Nick, need your input on session handling approach'"
-```
-
-**Live coding steps**:
-1. Show comment data structure
-2. Show vector store creation (pre-done)
-3. Add `relevantCommentsChain` to pipeline (LIVE CODE THIS)
-4. Re-generate email with richer context
-
-### Part 5: The "WOW" - Meme-Loving Developer (2 min)
-- Show Jamie's profile with `includeMemes: true`
-- Generate the humorous email
-- Audience laughs
-- "Same task data, completely different vibe!"
-
 ## Key Teaching Points
 
 ### 1. Orchestration vs Single Call

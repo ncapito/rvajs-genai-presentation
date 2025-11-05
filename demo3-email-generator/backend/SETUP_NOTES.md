@@ -175,19 +175,18 @@ GET http://localhost:3003/api/task-data
 - Verify network connectivity to Azure
 - Consider using Grok Code Fast for HTML step
 
-## Demo Tips
+## Testing and Experimentation Tips
 
-### For Presentation
-1. **Pre-warm models**: Generate one email before demo to warm up connections
-2. **Have backups**: Screenshot a good email in case of API issues
-3. **Monitor console**: Shows which models are being used
-4. **Test RAG**: Ensure embeddings are set up if demoing collaboration context
+### Before Running
+1. **Pre-warm models**: Generate one email first to warm up connections (initial requests are slower)
+2. **Monitor console**: Shows which models are being used and execution progress
+3. **Test RAG**: Ensure embeddings are set up if testing collaboration context features
 
-### Live Coding Opportunities
-1. **Add HTML step**: Show adding `.pipe(convertToHTMLChain)` live
-2. **Switch models**: Show changing `codeLLM` to different deployment
-3. **Toggle RAG**: Show enabling/disabling collaboration context
-4. **Adjust temperature**: Show how temperature affects output
+### Experimentation Ideas
+1. **Add HTML conversion**: Try adding `.pipe(convertToHTMLChain)` to see formatted output
+2. **Switch models**: Experiment with different model deployments to compare quality/speed
+3. **Toggle RAG**: Enable/disable collaboration context to see the impact on personalization
+4. **Adjust temperature**: Try different temperature values to see how it affects creativity vs consistency
 
 ## Development
 
@@ -221,4 +220,4 @@ npm start  # Runs compiled JavaScript from dist/
 3. ✅ Test batch generation (all 4 personas)
 4. ✅ Verify HTML emails render correctly
 5. ✅ Test RAG with embeddings (optional)
-6. ✅ Practice demo flow and timing
+6. ✅ Explore the LEARN.md exercises to understand the implementation

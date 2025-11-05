@@ -171,27 +171,6 @@ Try these in the **AFTER** tab (`http://localhost:4200/after`):
 
 ---
 
-## Demo Flow (20 minutes)
-
-### Part 1: Show the Problem (5 min)
-- Navigate to **BEFORE** tab (`http://localhost:4200/before`)
-- Demonstrate complex filter UI with multiple dropdowns
-- Show how tedious it is to build a query
-
-### Part 2: Show the Solution (5 min)
-- Navigate to **AFTER** tab (`http://localhost:4200/after`)
-- Type natural language queries
-- Demonstrate clarification flow
-- Show safety rejection
-
-### Part 3: Explain the Code (10 min)
-- Open `backend/src/services/llm.service.ts`
-- Walk through prompt engineering (lines 136-175)
-- Show Zod schema validation
-- Demonstrate how two layers (prompt + validation) work together
-
----
-
 ## Learning Outcomes
 
 After this demo, participants will understand:

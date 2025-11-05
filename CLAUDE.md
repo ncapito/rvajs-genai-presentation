@@ -8,6 +8,8 @@ This is a **learning repository** that teaches developers how to build productio
 
 **Repository Purpose**: Hands-on learning resource for GenAI application development
 
+**Original Context**: Based on RVA.js presentation - [View Slides](https://docs.google.com/presentation/d/1azOYBzRr1a-uM3meoA1oPiit4X0D93l2kpI9cHr5zP0/)
+
 **Learning Path**: Three progressive demos (beginner → intermediate → advanced)
 - Demo 1: Natural Language Task Querying (2-3 hours)
 - Demo 2: Receipt Parsing with Vision (2-3 hours)
@@ -41,8 +43,7 @@ This is a **learning repository** that teaches developers how to build productio
 │   ├── backend/                 - Node.js API implementation
 │   ├── frontend/                - Angular UI
 │   └── docs/
-│       ├── ARCHITECTURE.md      - Technical deep dive
-│       └── _archive/            - Original presentation materials
+│       └── ARCHITECTURE.md      - Technical deep dive
 │
 ├── demo2-receipts/              - Vision + structured output parsing demo
 │   ├── LEARN.md                 - Learning guide with 6 exercises
@@ -50,15 +51,12 @@ This is a **learning repository** that teaches developers how to build productio
 │   ├── frontend/                - Upload and display UI
 │   └── docs/
 │       ├── ARCHITECTURE-SIMPLE.md
-│       ├── ARCHITECTURE-FULL.md
-│       └── _archive/            - Presentation materials
+│       └── ARCHITECTURE-FULL.md
 │
 └── demo3-email-generator/       - Content personalization with RAG demo
     ├── LEARN.md                 - Advanced learning guide (6 exercises)
     ├── backend/                 - LangChain orchestration + RAG
-    ├── frontend/                - Email display UI
-    └── docs/
-        └── _archive/            - Presentation materials
+    └── frontend/                - Email display UI
 ```
 
 ## Core Concepts Demonstrated
@@ -463,11 +461,6 @@ Benefits: Safe rollout, easy A/B testing, graceful degradation
 - Demo 1: `demo1-tasks/LEARN.md` - 5 exercises (beginner)
 - Demo 2: `demo2-receipts/LEARN.md` - 6 exercises (intermediate)
 - Demo 3: `demo3-email-generator/LEARN.md` - 6 exercises (advanced)
-
-### Archived Materials
-- `demo*/docs/_archive/` - Original presentation materials
-- Useful for seeing the "before/after" context
-- Contains presenter notes and demo walkthroughs
 
 ## Repository Status
 

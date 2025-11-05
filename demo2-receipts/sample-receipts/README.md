@@ -49,7 +49,7 @@ These sample receipts are designed to match the 5 tasks with budgets in Demo 1's
 - **Receipt Date:** Nov 2 ✓ (within work period)
 - **Receipt Amount:** $847.69 ✓ (99.7% budget utilization - very high!)
 
-## How to Use for Demo
+## How to Use for Demo 2 
 
 ### Option 1: Text Screenshots
 1. Open each `.txt` file
